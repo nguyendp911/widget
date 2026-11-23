@@ -1,4 +1,5 @@
 import SwiftUI
+import AppIntents
 
 /// Thiên Niên Việt — one long, touchable Vietnamese almanac board.
 /// In an iPhone widget the board must fit Apple's systemLarge size (it cannot
@@ -9,6 +10,7 @@ struct ThienNienVietBoard: View {
     let upcomingEvents: [LunarEventOccurrence]
     var compact: Bool = false
     var useWidgetLinks: Bool = false
+    var widgetSelectedSection: ThienNienSection? = nil
     var drawsOwnBackground: Bool = true
     var onOpen: ((ThienNienSection) -> Void)? = nil
 
@@ -22,7 +24,12 @@ struct ThienNienVietBoard: View {
     var body: some View {
         ZStack {
             if drawsOwnBackground { background }
-            VStack(alignment: .leading, spacing: compact ? 3 : 9) {
+            if useWidgetLinks, let focused = widgetSelectedSection {
+                ThienNienWidgetDetailView(
+                    section: focused, civil: civil, upcomingEvents: upcomingEvents
+                )
+            } else {
+                VStack(alignment: .leading, spacing: compact ? 3 : 9) {
                 linked(.date) { titleBanner }
                 linked(.date) { dateSummary }
                 Rectangle().fill(gold.opacity(0.55)).frame(height: 1)
@@ -85,7 +92,8 @@ struct ThienNienVietBoard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(compact ? 12 : 18)
+                .padding(compact ? 12 : 18)
+            }
         }
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .accessibilityElement(children: .contain)
@@ -95,11 +103,11 @@ struct ThienNienVietBoard: View {
         _ section: ThienNienSection, @ViewBuilder content: () -> Content
     ) -> some View {
         if useWidgetLinks {
-            Link(destination: section.url(for: civil)) {
+            Button(intent: ThienNienSelectSectionIntent(section: section)) {
                 content().contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Xem chi tiết \(section.title)")
+            .accessibilityLabel("Xem ngay \(section.title) trên widget")
         } else {
             Button { onOpen?(section) } label: {
                 content().contentShape(Rectangle())

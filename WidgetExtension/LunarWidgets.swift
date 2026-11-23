@@ -6,6 +6,7 @@ struct LunarWidgetEntry: TimelineEntry {
     let civil: SolarCivilDate
     let appearance: LunarAppearance
     let family: [LunarEventOccurrence]
+    let focusedSection: ThienNienSection?
 }
 
 struct LunarWidgetProvider: TimelineProvider {
@@ -29,7 +30,12 @@ struct LunarWidgetProvider: TimelineProvider {
         let civil = SolarCivilDate(date: date) ?? SolarCivilDate(year: 2026, month: 1, day: 1)
         let events = LunarFamilyRepository().load()
         let upcoming = LunarEventScheduler.upcoming(events: events, from: civil, count: 3, years: 2)
-        return LunarWidgetEntry(date: date, civil: civil, appearance: LunarAppearanceRepository().load(), family: upcoming)
+        return LunarWidgetEntry(
+            date: date, civil: civil,
+            appearance: LunarAppearanceRepository().load(),
+            family: upcoming,
+            focusedSection: ThienNienWidgetFocusStore.load()
+        )
     }
 }
 
@@ -151,8 +157,8 @@ struct ViePNLunarAlmanacWidget: Widget {
 }
 
 
-/// SystemLarge is the tallest standard widget on iPhone. It cannot expand or
-/// present a sheet on SpringBoard; each section opens its sheet in the host app.
+/// iOS fixes systemLarge dimensions. Each row uses an App Intent to display
+/// a focused page in place without opening the host app; back restores the board.
 struct ViePNThienNienVietWidget: Widget {
     let kind = "ViePNThienNienViet"
     var body: some WidgetConfiguration {
@@ -160,18 +166,20 @@ struct ViePNThienNienVietWidget: Widget {
             ThienNienVietBoard(
                 civil: entry.civil, appearance: entry.appearance,
                 upcomingEvents: entry.family, compact: true,
-                useWidgetLinks: true, drawsOwnBackground: false
+                useWidgetLinks: true,
+                widgetSelectedSection: entry.focusedSection,
+                drawsOwnBackground: false
             )
             .containerBackground(for: .widget) {
                 LunarHeritageBackground(
                     appearance: entry.appearance, family: "Large", kind: .almanac
                 )
             }
-            // No parent widgetURL: it can shadow section-specific Link targets.
-            // All nine rows and the title have their own Link(destination:).
+            // Intentionally no widgetURL or Link on this surface:
+            // App Intent buttons change the widget content in place.
         }
         .configurationDisplayName("Thiên Niên Việt · Toàn cảnh")
-        .description("Âm dương, Can Chi, tử vi dân gian, giờ tốt, tiết khí, lễ và ngày giỗ. Chạm để xem chi tiết.")
+        .description("Âm dương, Can Chi, tử vi, giờ tốt, tiết khí và ngày giỗ. Chạm từng mục để xem ngay trong widget.")
         .contentMarginsDisabled()
         .supportedFamilies([.systemLarge])
     }
