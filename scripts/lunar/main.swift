@@ -28,6 +28,10 @@ import Foundation
         leapOnly.leapRule = .leapOnly
         assert(LunarEventScheduler.inLunarYear(leapOnly, year: 2025).count == 1, "leap only in leap year")
         assert(LunarEventScheduler.inLunarYear(leapOnly, year: 2026).isEmpty, "leap only missing year")
+        // Mùng 1 / Rằm also occur in a leap lunar month; these are NOT holidays that get skipped.
+        let leapStart = VietnameseLunarCalendar.lunarToSolar(VietnameseLunarDate(day: 1, month: 6, year: 2025, isLeapMonth: true))!
+        assert(LunarHighlights.nextLunarDay(from: leapStart, day: 1)?.daysUntil == 0, "moon observance in leap month")
+        assert(LunarHighlights.nextLunarDay(from: leapStart, day: 1)?.name.contains("nhuận") == true, "leap label")
         var both = leapOnly; both.leapRule = .both
         assert(LunarEventScheduler.inLunarYear(both, year: 2025).count == 2, "regular and leap")
         var thirty = source

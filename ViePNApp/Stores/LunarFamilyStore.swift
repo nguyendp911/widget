@@ -116,7 +116,7 @@ enum LunarNotificationScheduler {
             for offset in 0..<125 where added < 8 {
                 let date = VietnameseLunarCalendar.civilDate(todayJDN + offset)
                 guard let lunar = VietnameseLunarCalendar.solarToLunar(date),
-                      !lunar.isLeapMonth, lunar.day == 1 || lunar.day == 15,
+                      lunar.day == 1 || lunar.day == 15,
                       let fire = date.asDate(hour: 8), fire > Date() else { continue }
                 let body = UNMutableNotificationContent()
                 body.title = lunar.day == 1 ? "Hôm nay là mùng 1 âm lịch" : "Hôm nay là ngày Rằm"

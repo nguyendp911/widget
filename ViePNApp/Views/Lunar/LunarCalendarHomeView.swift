@@ -290,6 +290,7 @@ struct LunarCalendarHomeView: View {
             Picker("Mật độ thông tin", selection: Binding(get: { family.appearance.density }, set: { value in updateAppearance { $0.density = value } })) {
                 ForEach(LunarInformationDensity.allCases) { item in Text(item.label).tag(item) }
             }.font(.system(size: 12))
+            Toggle("Kiểu chữ số thanh lịch (Serif)", isOn: appearanceBinding(\.useSerif))
             Toggle("Hiện Can Chi", isOn: appearanceBinding(\.showCanChi))
             Toggle("Hiện sự kiện gia đình", isOn: appearanceBinding(\.showFamilyEvents))
             Toggle("Họa tiết nền thật nhẹ", isOn: appearanceBinding(\.showOrnament))

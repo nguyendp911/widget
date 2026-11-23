@@ -15,11 +15,11 @@ enum LunarHighlights {
         for offset in 0...maxDays {
             let solar = VietnameseLunarCalendar.civilDate(start + offset)
             guard let lunar = VietnameseLunarCalendar.solarToLunar(solar) else { continue }
-            if !lunar.isLeapMonth && lunar.day == 1 {
-                return LunarUpcomingFestival(name: "Mùng 1 tháng \(lunar.month)", solar: solar, lunar: lunar, daysUntil: offset)
+            if lunar.day == 1 {
+                return LunarUpcomingFestival(name: "Mùng 1 tháng \(lunar.month)\(lunar.isLeapMonth ? " nhuận" : "")", solar: solar, lunar: lunar, daysUntil: offset)
             }
-            if !lunar.isLeapMonth && lunar.day == 15 {
-                return LunarUpcomingFestival(name: "Rằm tháng \(lunar.month)", solar: solar, lunar: lunar, daysUntil: offset)
+            if lunar.day == 15 {
+                return LunarUpcomingFestival(name: "Rằm tháng \(lunar.month)\(lunar.isLeapMonth ? " nhuận" : "")", solar: solar, lunar: lunar, daysUntil: offset)
             }
         }
         return nil
@@ -29,8 +29,8 @@ enum LunarHighlights {
         let start = VietnameseLunarCalendar.jdn(civil)
         for offset in 0...maxDays {
             let solar = VietnameseLunarCalendar.civilDate(start + offset)
-            guard let lunar = VietnameseLunarCalendar.solarToLunar(solar), lunar.day == day, !lunar.isLeapMonth else { continue }
-            return LunarUpcomingFestival(name: day == 15 ? "Rằm tháng \(lunar.month)" : "Mùng 1 tháng \(lunar.month)", solar: solar, lunar: lunar, daysUntil: offset)
+            guard let lunar = VietnameseLunarCalendar.solarToLunar(solar), lunar.day == day else { continue }
+            return LunarUpcomingFestival(name: day == 15 ? "Rằm tháng \(lunar.month)\(lunar.isLeapMonth ? " nhuận" : "")" : "Mùng 1 tháng \(lunar.month)\(lunar.isLeapMonth ? " nhuận" : "")", solar: solar, lunar: lunar, daysUntil: offset)
         }
         return nil
     }

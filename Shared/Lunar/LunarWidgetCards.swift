@@ -27,6 +27,7 @@ struct LunarCardView: View {
     let upcomingEvents: [LunarEventOccurrence]
 
     private var theme: LunarTheme { appearance.theme }
+    private var dateDesign: Font.Design { appearance.useSerif ? .serif : .rounded }
     private var ink: Color { Color(hex: theme.foreground) }
     private var muted: Color { Color(hex: theme.muted) }
     private var accent: Color { Color(hex: theme.accent) }
@@ -93,7 +94,7 @@ struct LunarCardView: View {
             if size == .small {
                 VStack(alignment: .leading, spacing: 2) {
                     Spacer(minLength: 2)
-                    Text("\(civil.day)").font(.system(size: 56, weight: .light, design: .serif))
+                    Text("\(civil.day)").font(.system(size: 56, weight: .light, design: dateDesign))
                         .minimumScaleFactor(0.7).lineLimit(1)
                     Text("\(lunar?.day ?? 0) tháng \(lunar?.month ?? 0) âm")
                         .font(.system(size: 13, weight: .semibold)).foregroundStyle(accent).lineLimit(1)
@@ -103,7 +104,7 @@ struct LunarCardView: View {
                 }
             } else {
                 HStack(alignment: .center, spacing: 18) {
-                    Text("\(civil.day)").font(.system(size: 76, weight: .light, design: .serif))
+                    Text("\(civil.day)").font(.system(size: 76, weight: .light, design: dateDesign))
                         .minimumScaleFactor(0.7).lineLimit(1)
                     Rectangle().fill(accent.opacity(0.25)).frame(width: 1, height: 62)
                     VStack(alignment: .leading, spacing: 4) {
@@ -173,7 +174,7 @@ struct LunarCardView: View {
                 Text(event.title).font(.system(size: size == .small ? 18 : 26, weight: .medium, design: .serif))
                     .lineLimit(2).minimumScaleFactor(0.75)
                 Text("\(event.daysRemaining(from: civil))")
-                    .font(.system(size: size == .small ? 32 : 42, weight: .light, design: .serif))
+                    .font(.system(size: size == .small ? 32 : 42, weight: .light, design: dateDesign))
                     .foregroundStyle(accent)
                     + Text(" ngày nữa").font(.system(size: 11)).foregroundStyle(muted)
                 Text("Giỗ \(event.lunar.day)/\(event.lunar.month) âm · \(event.solar.label)")

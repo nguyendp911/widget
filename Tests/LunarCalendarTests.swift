@@ -21,6 +21,11 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertEqual(LunarEventScheduler.inLunarYear(e, year: 2025).count, 1)
         XCTAssertTrue(LunarEventScheduler.inLunarYear(e, year: 2026).isEmpty)
     }
+    func testLeapMonthStillHasFirstAndFullMoon() {
+        let leap = VietnameseLunarCalendar.lunarToSolar(VietnameseLunarDate(day: 1, month: 6, year: 2025, isLeapMonth: true))!
+        XCTAssertEqual(LunarHighlights.nextLunarDay(from: leap, day: 1)?.daysUntil, 0)
+        XCTAssertTrue(LunarHighlights.nextLunarDay(from: leap, day: 1)?.name.contains("nhuận") == true)
+    }
     func testMoonCountdownAndCalendarExport() {
         let day = SolarCivilDate(year: 2026, month: 11, day: 23)
         XCTAssertEqual(LunarHighlights.nextLunarDay(from: day, day: 15)?.daysUntil, 0)
