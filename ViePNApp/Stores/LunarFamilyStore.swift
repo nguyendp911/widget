@@ -1,6 +1,5 @@
 import Foundation
 import UserNotifications
-import WidgetKit
 
 @MainActor
 final class LunarFamilyStore: ObservableObject {
@@ -31,12 +30,6 @@ final class LunarFamilyStore: ObservableObject {
     func setAppearance(_ value: LunarAppearance) {
         appearance = value
         LunarAppearanceRepository().save(value)
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarToday")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarMonth")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarFamily")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarNext")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarMoon")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarTradition")
         Task { await syncNotifications() }
     }
 
@@ -47,12 +40,6 @@ final class LunarFamilyStore: ObservableObject {
 
     private func refreshAfterMutation() {
         reload()
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarToday")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarMonth")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarFamily")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarNext")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarMoon")
-        WidgetCenter.shared.reloadTimelines(ofKind: "ViePNLunarTradition")
         Task { await syncNotifications() }
     }
 

@@ -19,8 +19,3 @@ extension Color {
     }
 }
 
-extension WidgetDesign {
-    var backgroundColor: Color { Color(hex: backgroundHex) }
-    var foregroundColor: Color { Color(hex: foregroundHex) }
-    var accentColor: Color { Color(hex: accentHex) }
-}
