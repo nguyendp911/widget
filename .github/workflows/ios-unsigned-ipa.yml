@@ -75,8 +75,9 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl status_bar "$UDID" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --batteryState charged --batteryLevel 100 || true
           xcrun simctl install "$UDID" "$APP"
+          # Lịch Âm is the default landing tab; launching directly avoids
+          # iOS's first-time Open URL confirmation alert obscuring the screen.
           xcrun simctl launch "$UDID" com.viepn.widgetplus
-          xcrun simctl openurl "$UDID" 'viepnwidgetplus://lunar?date=2026-11-23'
           sleep 6
           mkdir -p screenshots
           xcrun simctl io "$UDID" screenshot screenshots/ViePN-Lich-Am-Heritage-iPhone.png
