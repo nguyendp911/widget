@@ -15,7 +15,7 @@ struct RootTabView: View {
             NavigationStack { DashboardView() }
                 .tabItem { Label("Today", systemImage: "house.fill") }.tag(ViePNTab.today)
             NavigationStack { LunarCalendarHomeView(incomingURL: $pendingLunarURL) }
-                .tabItem { Label("Lịch Âm", systemImage: "moon.stars.fill") }.tag(ViePNTab.lunar)
+                .tabItem { Label("Thiên Niên", systemImage: "moon.stars.fill") }.tag(ViePNTab.lunar)
             NavigationStack { UtilitiesHubView(selection: $selectedTool) }
                 .tabItem { Label("Tiện ích", systemImage: "bolt.square.fill") }.tag(ViePNTab.tools)
             NavigationStack { GalleryView() }

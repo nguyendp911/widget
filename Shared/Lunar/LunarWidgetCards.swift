@@ -108,7 +108,7 @@ struct LunarCardView: View {
         case .memorial: return "NGÀY GIỖ SẮP TỚI"
         case .month: return "LỊCH THÁNG VẠN NIÊN"
         case .tradition: return "NGÀY TRUYỀN THỐNG"
-        case .almanac: return "CAN CHI · TIẾT KHÍ"
+        case .almanac: return "THIÊN NIÊN · CAN CHI"
         }
     }
 

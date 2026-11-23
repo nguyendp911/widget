@@ -22,6 +22,7 @@ struct LunarCalendarHomeView: View {
     @State private var exportError: String?
     @State private var showAdvancedAppearance = false
     @State private var showAllFestivals = false
+    @State private var activeDetail: ThienNienSection?
 
     private var theme: LunarTheme { family.appearance.theme }
     private var ink: Color { Color(hex: theme.foreground) }
@@ -38,16 +39,17 @@ struct LunarCalendarHomeView: View {
                 hero
                 heritageShortcuts
                 VStack(alignment: .leading, spacing: 10) {
-                    sectionLabel("CAN CHI & TỬ VI", subtitle: "Thông tin lịch vạn niên hôm nay")
-                    LunarCardView(
-                        kind: .almanac, size: .large, civil: today,
-                        appearance: family.appearance, upcomingEvents: upcoming
+                    sectionLabel("THIÊN NIÊN VIỆT",
+                                 subtitle: "Một bảng lịch đầy đủ · Chạm từng mục để xem")
+                    ThienNienVietBoard(
+                        civil: selected, appearance: family.appearance,
+                        upcomingEvents: LunarEventScheduler.upcoming(
+                            events: family.events, from: selected, count: 5
+                        ),
+                        compact: false,
+                        onOpen: { activeDetail = $0 }
                     )
-                    .frame(height: 330)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    Text("Tử vi dân gian: con giáp và tuổi xung theo ngày, không phải lá số tử vi cá nhân.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(muted)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
                 widgetShowcase
                 VStack(alignment: .leading, spacing: 12) {
@@ -96,9 +98,12 @@ struct LunarCalendarHomeView: View {
         .foregroundStyle(ink)
         .environment(\.colorScheme, theme.usesLightSurface ? .light : .dark)
         .tint(accent)
-        .navigationTitle("Lịch Âm Tĩnh")
+        .navigationTitle("Thiên Niên Việt")
         .navigationBarTitleDisplayMode(.inline)
 
+        .sheet(item: $activeDetail) { section in
+            ThienNienDetailSheet(section: section, civil: selected, familyEvents: family.events)
+        }
         .sheet(isPresented: $addingEvent) { NavigationStack { LunarEventEditorView() } }
         .sheet(item: $editingEvent) { item in NavigationStack { LunarEventEditorView(editing: item) } }
         .alert("Không thể xuất lịch", isPresented: Binding(get: { exportError != nil }, set: { if !$0 { exportError = nil } })) {
@@ -117,6 +122,11 @@ struct LunarCalendarHomeView: View {
 
     private func handleURL(_ url: URL) {
         guard url.scheme == "viepnwidgetplus" else { return }
+        if let route = ThienNienSection.destination(from: url) {
+            if let date = route.date { selected = date }
+            activeDetail = route.section
+            return
+        }
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         if url.host == "lunar", let text = components?.queryItems?.first(where: { $0.name == "date" })?.value {
             let parts = text.split(separator: "-").compactMap { Int($0) }
@@ -135,7 +145,7 @@ struct LunarCalendarHomeView: View {
         VStack(alignment: .leading, spacing: 7) {
             HStack {
                 ViePNHeritageRibbon(
-                    title: "VIEPN · LỊCH ÂM VIỆT",
+                    title: "THIÊN NIÊN VIỆT",
                     color: theme.usesLightSurface ? "Red" : "Jade"
                 )
                 .frame(width: 215, height: 40)
@@ -201,9 +211,20 @@ struct LunarCalendarHomeView: View {
 
     private var widgetShowcase: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionLabel("LỊCH ÂM TĨNH", subtitle: "Widget trang nhã cho màn hình iPhone")
+            sectionLabel("THIÊN NIÊN VIỆT", subtitle: "Widget vạn niên và những ngày không quên")
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ThienNienVietBoard(
+                            civil: today, appearance: family.appearance,
+                            upcomingEvents: upcoming, compact: true,
+                            onOpen: { activeDetail = $0 }
+                        )
+                        .frame(width: 292, height: 333)
+                        Text("Thiên Niên Việt · Bảng tổng hợp")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(muted)
+                    }
                     showcase(kind: .today, size: .small, width: 164, height: 164)
                     showcase(kind: .nextEvent, size: .medium, width: 286, height: 164)
                     showcase(kind: .moonDays, size: .small, width: 164, height: 164)

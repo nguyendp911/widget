@@ -76,7 +76,7 @@ struct ViePNLunarTodayWidget: Widget {
     let kind = "ViePNLunarToday"
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .today) }
-            .configurationDisplayName("Lịch Âm Tĩnh · Hôm nay")
+            .configurationDisplayName("Thiên Niên Việt · Hôm nay")
             .description("Ngày dương, ngày âm và Can Chi với bố cục tối giản.")
             .contentMarginsDisabled()
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryInline, .accessoryRectangular])
@@ -143,9 +143,35 @@ struct ViePNLunarAlmanacWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) {
             LunarWidgetContent(entry: $0, kind: .almanac)
         }
-        .configurationDisplayName("Lịch Vạn Niên · Can Chi & Tử vi")
+        .configurationDisplayName("Thiên Niên Việt · Can Chi")
         .description("Xem ngay âm dương, Can Chi, tiết khí, giờ tốt, ngày giỗ và tử vi dân gian.")
         .contentMarginsDisabled()
         .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+
+/// SystemLarge is the tallest standard widget on iPhone. It cannot expand or
+/// present a sheet on SpringBoard; each section opens its sheet in the host app.
+struct ViePNThienNienVietWidget: Widget {
+    let kind = "ViePNThienNienViet"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { entry in
+            ThienNienVietBoard(
+                civil: entry.civil, appearance: entry.appearance,
+                upcomingEvents: entry.family, compact: true,
+                useWidgetLinks: true, drawsOwnBackground: false
+            )
+            .containerBackground(for: .widget) {
+                LunarHeritageBackground(
+                    appearance: entry.appearance, family: "Large", kind: .almanac
+                )
+            }
+            .widgetURL(ThienNienSection.date.url(for: entry.civil))
+        }
+        .configurationDisplayName("Thiên Niên Việt · Toàn cảnh")
+        .description("Âm dương, Can Chi, tử vi dân gian, giờ tốt, tiết khí, lễ và ngày giỗ. Chạm để xem chi tiết.")
+        .contentMarginsDisabled()
+        .supportedFamilies([.systemLarge])
     }
 }
