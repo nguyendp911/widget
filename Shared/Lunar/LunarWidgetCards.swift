@@ -30,9 +30,9 @@ struct LunarCardView: View {
 
     private var theme: LunarTheme { appearance.theme }
     private var dateDesign: Font.Design { appearance.useSerif ? .serif : .rounded }
-    private var ink: Color { Color(hex: theme.foreground) }
-    private var muted: Color { Color(hex: theme.muted) }
-    private var accent: Color { Color(hex: theme.accent) }
+    private var ink: Color { Color(hex: kind == .almanac ? "#FFF6E5" : theme.foreground) }
+    private var muted: Color { Color(hex: kind == .almanac ? "#E5CDB5" : theme.muted) }
+    private var accent: Color { Color(hex: kind == .almanac ? "#F1C984" : theme.accent) }
     private var lunar: VietnameseLunarDate? { VietnameseLunarCalendar.solarToLunar(civil) }
     private var nextFamily: LunarEventOccurrence? { upcomingEvents.first }
     private var nextMoon: LunarUpcomingFestival? { LunarHighlights.nextObservance(from: civil) }
@@ -46,9 +46,13 @@ struct LunarCardView: View {
             } else {
                 ZStack(alignment: .topTrailing) {
                     if drawsOwnBackground {
-                        LunarHeritageBackground(appearance: appearance)
+                        if kind == .almanac {
+                            LunarAlmanacBackground()
+                        } else {
+                            LunarHeritageBackground(appearance: appearance)
+                        }
                     }
-                    if appearance.showOrnament {
+                    if appearance.showOrnament && kind != .almanac {
                         if let ornament = LunarHeritageArt.ornament(for: theme) {
                             Image(ornament)
                                 .resizable()
@@ -92,7 +96,11 @@ struct LunarCardView: View {
 
     private var heading: some View {
         Group {
-            if size != .small && theme != .zen {
+            if kind == .almanac {
+                Text("LỊCH VẠN NIÊN")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.5).foregroundStyle(accent)
+            } else if size != .small && theme != .zen {
                 LunarHeritageSectionTitle(title: "LỊCH ÂM TĨNH", theme: theme)
                     .frame(height: 28)
             } else {
@@ -323,58 +331,30 @@ struct LunarCardView: View {
     private var almanacBody: some View {
         let facts = LunarAlmanacFacts(civil)
         if size == .large {
-            VStack(alignment: .leading, spacing: 9) {
-                HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .center, spacing: 12) {
                     Text("\(civil.day)")
-                        .font(.system(size: 51, weight: .light, design: .serif))
+                        .font(.system(size: 48, weight: .light, design: .serif))
                         .monospacedDigit()
-                        .foregroundStyle(ink)
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("THÁNG \(civil.month) · \(civil.year)")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(muted)
+                            .font(.system(size: 10, weight: .semibold)).foregroundStyle(muted)
                         Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)\(lunar?.isLeapMonth == true ? " nhuận" : "")")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(accent)
-                        Text("Ngày \(facts.canChiDay)")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(ink)
+                            .font(.system(size: 15, weight: .semibold)).foregroundStyle(accent)
+                        Text("Ngày \(facts.canChiDay) · Năm \(facts.canChiYear)")
+                            .font(.system(size: 10, weight: .medium)).lineLimit(1)
                     }
                     Spacer(minLength: 0)
                 }
-                separator
-                HStack(alignment: .top, spacing: 10) {
-                    almanacFact("CAN CHI", "Tháng \(facts.canChiMonth)\nNăm \(facts.canChiYear)")
-                    almanacFact("SAO · TRỰC", "\(facts.spirit)\nTrực \(facts.officer)")
-                }
-                HStack(alignment: .top, spacing: 10) {
-                    almanacFact("TIẾT KHÍ", facts.solarTerm)
-                    almanacFact("NGÀY", facts.dayKind)
-                }
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("GIỜ HOÀNG ĐẠO")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(muted)
-                    Text(facts.goodHoursLabel)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(ink)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                if appearance.showFamilyEvents, let event = nextFamily {
-                    HStack(spacing: 5) {
-                        Image(systemName: "heart")
-                        Text("Sắp tới: \(event.title)")
-                            .lineLimit(1)
-                        Spacer(minLength: 3)
-                        Text("\(event.daysRemaining(from: civil)) ngày")
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(accent)
-                }
-                Text("Tử vi dân gian (tham khảo) · Tuổi xung: \(facts.opposingZodiac)")
-                    .font(.system(size: 10))
-                    .foregroundStyle(muted)
+                almanacMonthGrid
+                Text("CAN CHI  ·  Tháng \(facts.canChiMonth) · Năm \(facts.canChiYear)")
+                    .font(.system(size: 9, weight: .medium)).lineLimit(1)
+                Text("\(facts.dayKind) · Trực \(facts.officer) · \(facts.solarTerm)")
+                    .font(.system(size: 9, weight: .medium)).lineLimit(1)
+                Text("Giờ hoàng đạo: \(facts.goodHoursLabel)")
+                    .font(.system(size: 9)).lineLimit(2).foregroundStyle(muted)
+                Text("Tử vi dân gian · Tuổi xung: \(facts.opposingZodiac)")
+                    .font(.system(size: 9)).lineLimit(1).foregroundStyle(accent)
             }
         } else {
             VStack(alignment: .leading, spacing: 5) {
@@ -408,6 +388,31 @@ struct LunarCardView: View {
                     .font(.system(size: 9))
                     .foregroundStyle(muted)
                     .lineLimit(1)
+            }
+        }
+    }
+
+    private var almanacMonthGrid: some View {
+        let first = SolarCivilDate(year: civil.year, month: civil.month, day: 1)
+        let jdn = VietnameseLunarCalendar.jdn(first)
+        let offset = (jdn % 7 + 7) % 7
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 1), count: 7), spacing: 1) {
+            ForEach(["T2", "T3", "T4", "T5", "T6", "T7", "CN"], id: \.self) { weekday in
+                Text(weekday).font(.system(size: 9, weight: .semibold)).foregroundStyle(accent)
+            }
+            ForEach(0..<42, id: \.self) { index in
+                let date = VietnameseLunarCalendar.civilDate(jdn - offset + index)
+                let lunarDate = VietnameseLunarCalendar.solarToLunar(date)
+                VStack(spacing: 0) {
+                    Text("\(date.day)")
+                        .font(.system(size: 10, weight: date == civil ? .bold : .medium))
+                    Text(lunarDate?.day == 1 ? "1/\(lunarDate?.month ?? 0)" : "\(lunarDate?.day ?? 0)")
+                        .font(.system(size: 7))
+                        .foregroundStyle(lunarDate?.day == 1 || lunarDate?.day == 15 ? accent : muted)
+                }
+                .frame(maxWidth: .infinity)
+                .opacity(date.month == civil.month ? 1 : 0.4)
+                .background(date == civil ? accent.opacity(0.28) : Color.clear, in: RoundedRectangle(cornerRadius: 4))
             }
         }
     }

@@ -84,3 +84,18 @@ struct LunarHeritageBackground: View {
         .allowsHitTesting(false)
     }
 }
+
+/// Full-bleed illustration for the combined calendar widget.
+struct LunarAlmanacBackground: View {
+    var body: some View {
+        GeometryReader { geometry in
+            Image("ViePNLunarLacquer")
+                .resizable()
+                .scaledToFill()
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
+                .overlay(Color.black.opacity(0.38))
+        }
+        .allowsHitTesting(false)
+    }
+}

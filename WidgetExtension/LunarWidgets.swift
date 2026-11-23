@@ -65,7 +65,11 @@ private struct LunarWidgetContent: View {
             LunarCardView(kind: kind, size: size, civil: entry.civil, appearance: entry.appearance,
                           upcomingEvents: entry.family, drawsOwnBackground: false)
                 .containerBackground(for: .widget) {
-                    LunarHeritageBackground(appearance: entry.appearance)
+                    if kind == .almanac {
+                        LunarAlmanacBackground()
+                    } else {
+                        LunarHeritageBackground(appearance: entry.appearance)
+                    }
                 }
                 .widgetURL(destination)
         }
