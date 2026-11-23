@@ -78,48 +78,59 @@ enum LunarTheme: String, CaseIterable, Codable, Identifiable {
 /// Choice of art cut from the user's original Vietnamese heritage sprite sheet.
 /// `automatic` follows the selected theme; `none` provides the original minimal look.
 enum LunarArtwork: String, Codable, CaseIterable, Identifiable {
+    // Each scene is independently generated; every family is a separate
+    // JPEG in Assets.xcassets. 8K masters are download assets, not embedded
+    // in the Widget Extension (to keep memory usage low).
     case automatic, none, spring, drum, lotus, moon, temple, chrysanthemum
+    case vanNien, gioNha
+
     var id: String { rawValue }
+
     var title: String {
         switch self {
         case .automatic: return "Tự động"
         case .none: return "Không ảnh"
         case .spring: return "Xuân Việt"
-        case .drum: return "Trống đồng"
-        case .lotus: return "Sen xanh"
-        case .moon: return "Trăng tre"
-        case .temple: return "Cổng làng"
-        case .chrysanthemum: return "Cúc vàng"
+        case .drum: return "Trống Đồng"
+        case .lotus: return "Sen Ngọc"
+        case .moon: return "Trăng Tre"
+        case .temple: return "Cổng Làng"
+        case .chrysanthemum: return "Cúc Vàng"
+        case .vanNien: return "Vạn Niên"
+        case .gioNha: return "Giỗ Nhà"
         }
     }
+
+    /// Kept for backwards-compatible callers that choose no family.
     var resourceName: String? {
-        switch self {
-        case .automatic, .none: return nil
-        case .spring: return "HeritageSpring"
-        case .drum: return "HeritageDrumPanel"
-        case .lotus: return "HeritageLotusPanel"
-        case .moon: return "HeritageMoonPanel"
-        case .temple: return "HeritageTemplePanel"
-        case .chrysanthemum: return "HeritageChrysanthemumPanel"
-        }
+        if self == .automatic || self == .none { return nil }
+        return resolvedResource(theme: .heritage)
     }
-    func resolvedResource(theme: LunarTheme) -> String? {
+
+    func resolvedResource(theme: LunarTheme, family: String = "Medium") -> String? {
+        let name: String
         switch self {
         case .none: return nil
         case .automatic:
             switch theme {
-            case .zen: return "HeritageSpring"
-            case .heritage: return "HeritageTemplePanel"
-            case .tet: return "HeritageSpring"
-            case .midAutumn: return "HeritageMoonPanel"
-            case .luxury: return "HeritageDrumPanel"
-            case .jade: return "HeritageLotusPanel"
-            case .gold: return "HeritageChrysanthemumPanel"
-            case .ink: return "HeritageMoonPanel"
-            case .lotus: return "HeritageLotusPanel"
+            case .zen, .tet: name = "ViePNXuanViet"
+            case .heritage: name = "ViePNVanNien"
+            case .luxury: name = "ViePNTrongDong"
+            case .midAutumn, .ink: name = "ViePNTrangTre"
+            case .jade, .lotus: name = "ViePNSenNgoc"
+            case .gold: name = "ViePNCucVang"
             }
-        default: return resourceName
+        case .spring: name = "ViePNXuanViet"
+        case .drum: name = "ViePNTrongDong"
+        case .lotus: name = "ViePNSenNgoc"
+        case .moon: name = "ViePNTrangTre"
+        case .temple: name = "ViePNCongLang"
+        case .chrysanthemum: name = "ViePNCucVang"
+        case .vanNien: name = "ViePNVanNien"
+        case .gioNha: name = "ViePNGioNha"
         }
+        let variant = ["Small", "Medium", "Large"].contains(family) ? family : "Medium"
+        return name + variant
     }
 }
 

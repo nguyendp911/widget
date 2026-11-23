@@ -65,7 +65,7 @@ private struct LunarWidgetContent: View {
             LunarCardView(kind: kind, size: size, civil: entry.civil, appearance: entry.appearance,
                           upcomingEvents: entry.family, drawsOwnBackground: false)
                 .containerBackground(for: .widget) {
-                    LunarHeritageBackground(appearance: entry.appearance)
+                    LunarHeritageBackground(appearance: entry.appearance, family: size.assetFamily)
                 }
                 .widgetURL(destination)
         }
@@ -143,8 +143,8 @@ struct ViePNLunarAlmanacWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) {
             LunarWidgetContent(entry: $0, kind: .almanac)
         }
-        .configurationDisplayName("Lịch Vạn Niên · đầy đủ")
-        .description("Ngày âm dương, Can Chi, sao/trực, tiết khí, giờ hoàng đạo và ngày giỗ.")
+        .configurationDisplayName("Lịch Vạn Niên · Can Chi & Tử vi")
+        .description("Xem ngay âm dương, Can Chi, tiết khí, giờ tốt, ngày giỗ và tử vi dân gian.")
         .contentMarginsDisabled()
         .supportedFamilies([.systemMedium, .systemLarge])
     }

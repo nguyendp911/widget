@@ -12,6 +12,8 @@ struct LunarAlmanacFacts {
     let auspicious: Bool
     let goodHours: [String]
     let opposingZodiac: String
+    let dayAnimal: String
+    let yearAnimal: String
 
     init(_ civil: SolarCivilDate) {
         let cycle = VietnameseLunarCalendar.canChi(civil)
@@ -25,6 +27,8 @@ struct LunarAlmanacFacts {
         auspicious = tradition.auspicious
         goodHours = VietnameseLunarCalendar.luckyHours(civil)
         let chi = cycle?.day.split(separator: " ").last.map(String.init) ?? ""
+        dayAnimal = chi
+        yearAnimal = cycle?.year.split(separator: " ").last.map(String.init) ?? "—"
         if let index = VietnameseLunarCalendar.chi.firstIndex(of: chi) {
             opposingZodiac = VietnameseLunarCalendar.chi[(index + 6) % 12]
         } else {

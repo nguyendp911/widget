@@ -29,57 +29,46 @@ enum LunarHeritageArt {
     }
 }
 
-/// Sharp native composition for Retina widgets. The original source is a
-/// collage: individual panels are too small to scale as full-bleed artwork.
-/// Use SwiftUI drawing for the full canvas and keep cropped art near 1:1 size.
+/// High-detail Vietnamese scenes, pre-rasterized to each widget family
+/// instead of stretching low-resolution tiles from a sprite sheet.
 struct LunarHeritageBackground: View {
     let appearance: LunarAppearance
+    var family: String = "Medium"
 
     var body: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let height = geometry.size.height
-            let accent = Color(hex: appearance.theme.accent)
+        GeometryReader { proxy in
+            let light = appearance.theme.usesLightSurface
+            let surface = Color(hex: appearance.theme.secondaryBackground)
             ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(hex: appearance.theme.secondaryBackground),
-                        Color(hex: appearance.theme.background)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                // Native vector atmosphere remains sharp on all Retina sizes.
-                Circle()
-                    .fill(accent.opacity(appearance.theme.usesLightSurface ? 0.10 : 0.16))
-                    .frame(width: min(width * 0.48, 132), height: min(width * 0.48, 132))
-                    .position(x: width * 0.85, y: height * 0.16)
-
-                Path { path in
-                    path.move(to: CGPoint(x: 0, y: height * 0.90))
-                    path.addCurve(
-                        to: CGPoint(x: width, y: height * 0.86),
-                        control1: CGPoint(x: width * 0.33, y: height * 0.73),
-                        control2: CGPoint(x: width * 0.67, y: height * 1.02)
-                    )
-                }
-                .stroke(accent.opacity(0.19), lineWidth: 1)
-
-                if let image = appearance.artwork.resolvedResource(theme: appearance.theme) {
-                    // A small illustration, never a stretched low-resolution background.
-                    Image(image)
+                Color(hex: appearance.theme.background)
+                if let name = appearance.artwork.resolvedResource(theme: appearance.theme, family: family) {
+                    Image(name)
                         .resizable()
                         .interpolation(.high)
-                        .scaledToFit()
-                        .frame(width: min(width * 0.40, 112),
-                               height: min(height * 0.46, 66))
-                        .opacity(appearance.theme.usesLightSurface ? 0.72 : 0.62)
-                        .position(x: width * 0.79, y: height * 0.83)
-                        .accessibilityHidden(true)
+                        .scaledToFill()
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
+                        // Legibility only where text tends to sit; artwork
+                        // remains visible at the far edge.
+                        .overlay {
+                            LinearGradient(
+                                stops: [
+                                    .init(color: surface.opacity(light ? 0.77 : 0.79), location: 0.0),
+                                    .init(color: surface.opacity(light ? 0.64 : 0.67), location: 0.54),
+                                    .init(color: surface.opacity(light ? 0.11 : 0.18), location: 1.0)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        }
+                } else {
+                    LinearGradient(
+                        colors: [surface, Color(hex: appearance.theme.background)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
                 }
             }
-            .frame(width: width, height: height)
-            .clipped()
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .allowsHitTesting(false)
     }

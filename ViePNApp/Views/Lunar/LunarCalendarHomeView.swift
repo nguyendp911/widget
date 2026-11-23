@@ -64,7 +64,7 @@ struct LunarCalendarHomeView: View {
                         )
                         .frame(height: 310)
                         .clipShape(RoundedRectangle(cornerRadius: 18))
-                        Text("Tử vi dân gian và ngày tốt–xấu là quan niệm văn hóa, không phải dự đoán cá nhân.")
+                        Text("Tử vi dân gian: tuổi của ngày, tuổi xung; không thay thế lá số tử vi cá nhân.")
                             .font(.system(size: 11))
                             .foregroundStyle(muted)
                     }
@@ -368,7 +368,7 @@ struct LunarCalendarHomeView: View {
                     }
                 }
             }.scrollIndicators(.hidden)
-            Text("TRANH NỀN TỪ BỘ ASSET VIỆT")
+            Text("8 TRANH NỀN RIÊNG · SMALL / MEDIUM / LARGE")
                 .font(.system(size: 10, weight: .semibold))
                 .tracking(1.0).foregroundStyle(muted)
             ScrollView(.horizontal) {

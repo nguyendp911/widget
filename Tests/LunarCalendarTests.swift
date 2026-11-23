@@ -22,6 +22,15 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertFalse(facts.solarTerm.isEmpty)
     }
 
+    func testRetinaHeritageArtworkHasDedicatedWidgetFamilies() {
+        let art = LunarArtwork.vanNien
+        XCTAssertEqual(art.resolvedResource(theme: .heritage, family: "Small"), "ViePNVanNienSmall")
+        XCTAssertEqual(art.resolvedResource(theme: .heritage, family: "Medium"), "ViePNVanNienMedium")
+        XCTAssertEqual(art.resolvedResource(theme: .heritage, family: "Large"), "ViePNVanNienLarge")
+        XCTAssertEqual(LunarArtwork.gioNha.resolvedResource(theme: .heritage), "ViePNGioNhaMedium")
+        XCTAssertNil(LunarArtwork.none.resolvedResource(theme: .heritage, family: "Large"))
+    }
+
     func testTetAndLeapMonths() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(VietnameseLunarCalendar.solarToLunar(tet),

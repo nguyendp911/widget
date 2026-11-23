@@ -18,7 +18,16 @@ enum LunarCardKind: String, CaseIterable, Identifiable {
     }
 }
 
-enum LunarCardSize { case small, medium, large, lock }
+enum LunarCardSize {
+    case small, medium, large, lock
+    var assetFamily: String {
+        switch self {
+        case .small: return "Small"
+        case .medium, .lock: return "Medium"
+        case .large: return "Large"
+        }
+    }
+}
 
 struct LunarCardView: View {
     let kind: LunarCardKind
@@ -46,9 +55,9 @@ struct LunarCardView: View {
             } else {
                 ZStack(alignment: .topTrailing) {
                     if drawsOwnBackground {
-                        LunarHeritageBackground(appearance: appearance)
+                        LunarHeritageBackground(appearance: appearance, family: size.assetFamily)
                     }
-                    if appearance.showOrnament {
+                    if appearance.showOrnament && appearance.artwork == .none {
                         if let ornament = LunarHeritageArt.ornament(for: theme) {
                             Image(ornament)
                                 .resizable()
@@ -93,7 +102,7 @@ struct LunarCardView: View {
     private var heading: some View {
         Group {
             if size != .small && theme != .zen {
-                LunarHeritageSectionTitle(title: "LỊCH ÂM TĨNH", theme: theme)
+                LunarHeritageSectionTitle(title: kind == .almanac ? "LỊCH VẠN NIÊN" : "LỊCH ÂM TĨNH", theme: theme)
                     .frame(height: 28)
             } else {
                 HStack(spacing: 6) {
