@@ -134,8 +134,11 @@ struct LunarCalendarHomeView: View {
     private var hero: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack {
-                Label("VIEPN · LỊCH ÂM VIỆT", systemImage: "moon.stars")
-                    .font(.system(size: 10, weight: .semibold)).tracking(1.7).foregroundStyle(accent)
+                ViePNHeritageRibbon(
+                    title: "VIEPN · LỊCH ÂM VIỆT",
+                    color: theme.usesLightSurface ? "Red" : "Jade"
+                )
+                .frame(width: 215, height: 40)
                 Spacer()
                 Text("UTC+7").font(.system(size: 10, weight: .medium)).foregroundStyle(muted)
             }
@@ -157,17 +160,17 @@ struct LunarCalendarHomeView: View {
 
     private var heritageShortcuts: some View {
         HStack(alignment: .top, spacing: 8) {
-            heritageShortcut("Hôm nay", icon: "HeritageActionCalendar") {
+            heritageShortcut("Hôm nay", icon: .calendar) {
                 selected = today
                 mode = .day
             }
-            heritageShortcut("Ngày giỗ", icon: "HeritageActionFamily") {
+            heritageShortcut("Ngày giỗ", icon: .memorial) {
                 addingEvent = true
             }
-            heritageShortcut("Nhắc việc", icon: "HeritageActionBell") {
+            heritageShortcut("Nhắc việc", icon: .reminder) {
                 Task { await family.enableNotifications() }
             }
-            heritageShortcut("Xem năm", icon: "HeritageActionCulture") {
+            heritageShortcut("Xem năm", icon: .books) {
                 mode = .year
             }
         }
@@ -175,11 +178,20 @@ struct LunarCalendarHomeView: View {
         .background(panel.opacity(0.7), in: RoundedRectangle(cornerRadius: 16))
     }
 
-    private func heritageShortcut(_ label: String, icon: String, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 2) {
-            LunarHeritageActionButton(assetName: icon, accessibilityTitle: label, action: action)
+    private func heritageShortcut(_ label: String, icon: LunarGlyph, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 4) {
+            Button(action: action) {
+                Image(icon.asset)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 46, height: 46)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(label)
             Text(label)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 11, weight: .medium, design: .serif))
                 .foregroundStyle(muted)
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
