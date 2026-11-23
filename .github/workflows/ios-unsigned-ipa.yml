@@ -1,4 +1,4 @@
-name: ViePN Widget+ - Unsigned IPA
+name: Thiên Niên Việt - unsigned iOS IPA
 
 on:
   push:
@@ -6,170 +6,82 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  unsigned-ipa:
+  build-iphone:
     runs-on: macos-latest
-    timeout-minutes: 40
+    timeout-minutes: 35
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Show Xcode version
+      - uses: actions/checkout@v4
+      - name: Xcode version
         run: xcodebuild -version
-
       - name: Install XcodeGen
         run: brew install xcodegen
-
-      - name: Validate starter
-        run: python3 scripts/validate_source.py
-
-      - name: Test pure utility data logic
-        run: bash scripts/run_utility_smoke.sh
-
-      - name: Test Vietnamese lunar conversion and recurring family events
+      - name: Validate standalone lunar app
+        run: python3 scripts/validate_lunar_app.py
+      - name: Test lunar conversion and recurring memorials
         run: bash scripts/run_lunar_smoke.sh
-
-      - name: Verify full Vietnamese heritage asset kit
-        run: python3 scripts/validate_heritage_kit.py
-
-      - name: Generate Xcode project
+      - name: Generate Xcode
         run: xcodegen generate
-
-      - name: Build tests for iOS Simulator
+      - name: Build for iOS Simulator
         shell: bash
         run: |
           set -o pipefail
-          xcodebuild \
-            -project ViePNWidgetPlus.xcodeproj \
-            -scheme ViePNWidgetPlus \
-            -configuration Debug \
-            -sdk iphonesimulator \
+          xcodebuild -project ThienNienViet.xcodeproj -scheme ViePNWidgetPlus \
+            -configuration Debug -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/ViePNTestsDerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            build-for-testing 2>&1 | tee "$RUNNER_TEMP/viepn-tests-build.log"
-
-      - name: Capture actual Lịch Âm screen in iPhone Simulator
-        # A real screenshot is needed to compare with the approved Vietnamese design.
-        # UI screenshots are supplementary, never substitute for an IPA build.
-        timeout-minutes: 6
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -euo pipefail
-          APP="$RUNNER_TEMP/ViePNTestsDerivedData/Build/Products/Debug-iphonesimulator/ViePNWidgetPlus.app"
-          test -d "$APP"
-          UDID=$(xcrun simctl list devices available --json | python3 -c '
-          import sys, json
-          devices = json.load(sys.stdin)["devices"]
-          matches = [d["udid"] for arr in devices.values() for d in arr
-                     if d.get("isAvailable") and d.get("name", "").startswith("iPhone")]
-          print(matches[0] if matches else "")
-          ')
-          test -n "$UDID"
-          xcrun simctl boot "$UDID" || true
-          xcrun simctl bootstatus "$UDID" -b
-          xcrun simctl status_bar "$UDID" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --batteryState charged --batteryLevel 100 || true
-          xcrun simctl install "$UDID" "$APP"
-          # Lịch Âm is the default landing tab; launching directly avoids
-          # iOS's first-time Open URL confirmation alert obscuring the screen.
-          xcrun simctl launch "$UDID" com.viepn.widgetplus
-          sleep 6
-          mkdir -p screenshots
-          xcrun simctl io "$UDID" screenshot screenshots/ViePN-Lich-Am-Heritage-iPhone.png
-          file screenshots/ViePN-Lich-Am-Heritage-iPhone.png
-          # Verify real sheet composition without the iOS external URL prompt.
-          # The preview flag is compiled only in Debug and never ships in Release.
-          xcrun simctl terminate "$UDID" com.viepn.widgetplus || true
-          SIMCTL_CHILD_VIEPN_PREVIEW_MODAL=canChi xcrun simctl launch "$UDID" com.viepn.widgetplus
-          sleep 5
-          xcrun simctl io "$UDID" screenshot screenshots/ViePN-Thien-Nien-CanChi-Modal.png
-          file screenshots/ViePN-Thien-Nien-CanChi-Modal.png
-
-      - name: Upload design parity screenshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ViePN-Lunar-UI-Screenshot
-          path: screenshots/*.png
-          if-no-files-found: ignore
-          retention-days: 14
-
-      - name: Build unsigned device app
+            -derivedDataPath "$RUNNER_TEMP/lunar-simulator" \
+            CODE_SIGNING_ALLOWED=NO build-for-testing \
+            2>&1 | tee "$RUNNER_TEMP/lunar-simulator-build.log"
+      - name: Build iPhone application without signing
         shell: bash
         run: |
           set -o pipefail
-          xcodebuild \
-            -project ViePNWidgetPlus.xcodeproj \
-            -scheme ViePNWidgetPlus \
-            -configuration Release \
-            -sdk iphoneos \
+          xcodebuild -project ThienNienViet.xcodeproj -scheme ViePNWidgetPlus \
+            -configuration Release -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath "$RUNNER_TEMP/ViePNDerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY='' \
-            build 2>&1 | tee "$RUNNER_TEMP/viepn-xcodebuild.log"
-
-      - name: Verify illustrated artwork in both application and widget bundle
+            -derivedDataPath "$RUNNER_TEMP/lunar-device" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee "$RUNNER_TEMP/lunar-device-build.log"
+      - name: Verify clean standalone app
         shell: bash
         run: |
           set -euo pipefail
-          APP="$RUNNER_TEMP/ViePNDerivedData/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
-          for bundle in "$APP" "$APP/PlugIns/ViePNWidgets.appex"; do
-            test -d "$bundle" || { echo "::error::Missing bundle: $bundle"; exit 1; }
-            assets="$bundle/Assets.car"
-            test -s "$assets" || { echo "::error::Missing Assets.car in $bundle"; exit 1; }
-            listing="$RUNNER_TEMP/$(basename "$bundle")-assets.json"
-            xcrun --sdk iphoneos assetutil --info "$assets" > "$listing"
-            for name in HeritageSpring HeritageTemplePanel HeritageLotus HeritageBadgeMemorial HeritageTitleGreen HeritageActionCalendar HeritageFestivalTet HeritageNavAdd HeritagePatternJade ViePNXuanVietSmall ViePNXuanVietMedium ViePNXuanVietLarge ViePNVanNienLarge ViePNGioNhaMedium ViePNTrongDongLarge ViePNSenNgocSmall ViePNIconCalendar ViePNIconCanChi ViePNIconZodiac ViePNIconGoodHours ViePNIconFamily ViePNIconMemorial ViePNIconReminder ViePNTitleRed ViePNTitleCream ViePNTitleJade; do
-              grep -Fq "\"$name\"" "$listing" || {
-                echo "::error::Asset $name was not compiled into $(basename "$bundle")"
-                exit 1
-              }
-            done
-            echo "Verified lunar artwork in $(basename "$bundle")"
-          done
-
-      - name: Package Payload into unsigned IPA
-        shell: bash
-        run: |
-          set -euo pipefail
-          APP="$RUNNER_TEMP/ViePNDerivedData/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
+          APP="$RUNNER_TEMP/lunar-device/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
           test -d "$APP"
-          mkdir -p "$RUNNER_TEMP/viepn-payload/Payload" dist
-          cp -R "$APP" "$RUNNER_TEMP/viepn-payload/Payload/"
-          (cd "$RUNNER_TEMP/viepn-payload" && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ViePN-WidgetPlus-unsigned.ipa" Payload)
-          unzip -t dist/ViePN-WidgetPlus-unsigned.ipa | tail -1
-          unzip -l dist/ViePN-WidgetPlus-unsigned.ipa | grep 'Payload/ViePNWidgetPlus.app/Info.plist'
-          shasum -a 256 dist/ViePN-WidgetPlus-unsigned.ipa > dist/SHA256SUMS.txt
-
-      - name: Upload IPA artifact
+          test ! -d "$APP/PlugIns"
+          test -s "$APP/Assets.car"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist" | grep -Fx 'com.viepn.widgetplus'
+          echo "Confirmed standalone lunar iOS app without Widget Extension"
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/lunar-device/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
+          mkdir -p "$RUNNER_TEMP/lunar-payload/Payload" dist
+          cp -R "$APP" "$RUNNER_TEMP/lunar-payload/Payload/"
+          (cd "$RUNNER_TEMP/lunar-payload" && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ThienNienViet-unsigned.ipa" Payload)
+          unzip -t dist/ThienNienViet-unsigned.ipa | tail -1
+          shasum -a 256 dist/ThienNienViet-unsigned.ipa > dist/SHA256SUMS.txt
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ViePN-WidgetPlus-unsigned-IPA
+          name: Thien-Nien-Viet-iOS-Unsigned-IPA
           path: dist/*
           if-no-files-found: error
           retention-days: 30
-
-      - name: Upload test-build log if failed
+      - name: Upload simulator build log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ViePN-tests-build-diagnostics
-          path: ${{ runner.temp }}/viepn-tests-build.log
+          name: Thien-Nien-Viet-Simulator-Build-Log
+          path: ${{ runner.temp }}/lunar-simulator-build.log
           if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Upload Xcode build log if failed
+      - name: Upload iPhone build log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ViePN-xcodebuild-diagnostics
-          path: ${{ runner.temp }}/viepn-xcodebuild.log
+          name: Thien-Nien-Viet-iPhone-Build-Log
+          path: ${{ runner.temp }}/lunar-device-build.log
           if-no-files-found: ignore
-          retention-days: 7

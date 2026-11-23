@@ -1,4 +1,4 @@
-name: ViePNWidgetPlus
+name: ThienNienViet
 options:
   bundleIdPrefix: com.viepn
   deploymentTarget:
@@ -8,8 +8,8 @@ settings:
     SWIFT_VERSION: "5.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1"
-    MARKETING_VERSION: "2.5.2"
-    CURRENT_PROJECT_VERSION: "20"
+    MARKETING_VERSION: "3.0.0"
+    CURRENT_PROJECT_VERSION: "21"
     CODE_SIGN_STYLE: Automatic
 
 targets:
@@ -17,22 +17,33 @@ targets:
     type: application
     platform: iOS
     sources:
-      - path: ViePNApp
-      - path: Shared
+      - path: ViePNApp/ThienNienVietApp.swift
+      - path: ViePNApp/Stores/LunarFamilyStore.swift
+      - path: ViePNApp/Views/Lunar/ThienNienHomeView.swift
+      - path: ViePNApp/Views/Lunar/ThienNienLunarBoard.swift
+      - path: ViePNApp/Views/Lunar/ThienNienSettingsView.swift
+      - path: ViePNApp/Views/Lunar/ThienNienDetailSheet.swift
+      - path: ViePNApp/Views/Lunar/LunarEventEditorView.swift
+      - path: Shared/Theme/Color+Hex.swift
+      - path: Shared/Lunar/Assets.xcassets
+      - path: Shared/Lunar/VietnameseLunarCalendar.swift
+      - path: Shared/Lunar/LunarAlmanacFacts.swift
+      - path: Shared/Lunar/LunarFamilyEvents.swift
+      - path: Shared/Lunar/LunarAppearance.swift
+      - path: Shared/Lunar/LunarCulture.swift
+      - path: Shared/Lunar/LunarHighlights.swift
+      - path: Shared/Lunar/LunarICSExporter.swift
+      - path: Shared/Lunar/ThienNienSection.swift
     info:
       path: ViePNApp/Info.plist
       properties:
-        CFBundleDisplayName: "ViePN Widget+"
+        CFBundleDisplayName: "Thiên Niên Việt"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIRequiresFullScreen: false
-        CFBundleURLTypes:
-          - CFBundleURLSchemes:
-              - viepnwidgetplus
-            CFBundleURLName: com.viepn.widgetplus.navigation
     entitlements:
       path: ViePNApp/App.entitlements
       properties:
@@ -41,41 +52,14 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.viepn.widgetplus
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_EMIT_LOC_STRINGS: YES
-    dependencies:
-      - target: ViePNWidgets
-        embed: true
-
-  ViePNWidgets:
-    type: app-extension
-    platform: iOS
-    sources:
-      - path: WidgetExtension
-      - path: Shared
-    info:
-      path: WidgetExtension/Info.plist
-      properties:
-        CFBundleDisplayName: "ViePN Widgets"
-        CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        NSExtension:
-          NSExtensionPointIdentifier: com.apple.widgetkit-extension
-    entitlements:
-      path: WidgetExtension/Widgets.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.viepn.widgetplus
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.viepn.widgetplus.widgets
-        APPLICATION_EXTENSION_API_ONLY: YES
-        SKIP_INSTALL: YES
 
   ViePNTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: Tests
+      - path: Tests/LunarOnlyTests.swift
     dependencies:
       - target: ViePNWidgetPlus
     settings:
