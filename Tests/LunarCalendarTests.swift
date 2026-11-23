@@ -72,6 +72,23 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertEqual(facts.goodHours.count, 6)
     }
 
+    func testThienNienVietModalLinksRoundTrip() {
+        let day = SolarCivilDate(year: 2026, month: 11, day: 23)
+        for section in ThienNienSection.allCases {
+            let link = section.url(for: day)
+            let parsed = ThienNienSection.destination(from: link)
+            XCTAssertEqual(parsed?.section, section)
+            XCTAssertEqual(parsed?.date, day)
+            XCTAssertEqual(link.host, "lunar")
+        }
+        XCTAssertNil(ThienNienSection.destination(
+            from: URL(string: "https://one.google.com/ai")!
+        ))
+        XCTAssertNil(ThienNienSection.destination(
+            from: URL(string: "viepnwidgetplus://lunar?detail=unknown")!
+        ))
+    }
+
     func testTetAndLeapMonths() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(VietnameseLunarCalendar.solarToLunar(tet),
