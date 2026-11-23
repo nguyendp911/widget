@@ -82,6 +82,13 @@ jobs:
           mkdir -p screenshots
           xcrun simctl io "$UDID" screenshot screenshots/ViePN-Lich-Am-Heritage-iPhone.png
           file screenshots/ViePN-Lich-Am-Heritage-iPhone.png
+          # Verify real sheet composition without the iOS external URL prompt.
+          # The preview flag is compiled only in Debug and never ships in Release.
+          xcrun simctl terminate "$UDID" com.viepn.widgetplus || true
+          SIMCTL_CHILD_VIEPN_PREVIEW_MODAL=canChi xcrun simctl launch "$UDID" com.viepn.widgetplus
+          sleep 5
+          xcrun simctl io "$UDID" screenshot screenshots/ViePN-Thien-Nien-CanChi-Modal.png
+          file screenshots/ViePN-Thien-Nien-CanChi-Modal.png
 
       - name: Upload design parity screenshot
         if: always()

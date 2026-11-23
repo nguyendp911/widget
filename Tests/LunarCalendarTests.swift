@@ -72,6 +72,17 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertEqual(facts.goodHours.count, 6)
     }
 
+    func testThienNienWidgetInteractiveSelectionPersistence() {
+        let existing = ThienNienWidgetFocusStore.load()
+        defer { ThienNienWidgetFocusStore.save(existing) }
+        ThienNienWidgetFocusStore.save(.canChi)
+        XCTAssertEqual(ThienNienWidgetFocusStore.load(), .canChi)
+        ThienNienWidgetFocusStore.save(.memorials)
+        XCTAssertEqual(ThienNienWidgetFocusStore.load(), .memorials)
+        ThienNienWidgetFocusStore.save(nil)
+        XCTAssertNil(ThienNienWidgetFocusStore.load())
+    }
+
     func testThienNienVietModalLinksRoundTrip() {
         let day = SolarCivilDate(year: 2026, month: 11, day: 23)
         for section in ThienNienSection.allCases {
