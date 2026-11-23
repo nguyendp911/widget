@@ -1,152 +1,50 @@
-# ViePN Widget+ — iOS 17+ SwiftUI Starter
+# ViePN Widget+ — iOS 17+ · Living Canvas + Life OS + Lịch Âm Tĩnh
 
-A real source-code starter for **ViePN Widget+** with an iOS app, WidgetKit extension,
-App Intents, shared storage, theme gallery and editable widget designs.
+SwiftUI iPhone app with WidgetKit, App Intents, App Groups, a visual widget editor, daily utility widgets and a **Vietnamese lunar family calendar**.
 
-> Status: **Starter / not yet compiled on Xcode**. All Swift files are source files,
-> not an already-built `.ipa`. macOS + Xcode is required for the first actual iOS build.
+## Where to find Lịch Âm
 
-## Included
+Open the bottom tab **Lịch Âm** (moon icon), next to Today. Browse solar/lunar dates in day, week, month and year modes; add recurring lunar anniversaries/memorials under **Những ngày không quên**, and enable notifications.
 
-- SwiftUI app with five tabs: Home, Explore, Studio, My Widgets, Settings.
-- Template gallery: 12 templates across six categories.
-- Editor: title, message, font, color, border, photo selection and countdown date.
-- Widget Extension: configurable per-instance design, small / medium / large.
-- Interactive habit button via App Intent.
-- App Groups + shared UserDefaults, image files in the shared container.
-- Privacy manifests and a GitHub Actions workflow that builds an unsigned iPhone-device IPA.
-- `docs/TECHNICAL_SPEC.md` and `docs/ROADMAP.md`.
+### Vietnamese Heritage assets (v2.2.4)
 
-## On Windows
+The attached Vietnamese art sheet has been separated into **17 actual raster resources** under `Shared/Lunar/Assets.xcassets/`: six illustrated calendar backgrounds, four lunar badges (Mùng 1, Rằm, Ngày Giỗ, Nhuận), and seven ornaments (lotus, bamboo, peach blossom, lantern, cloud, village gate, Đông Sơn drum). A matching 1024px ViePN app icon is included.
+
+In-app: **Lịch Âm → Cá nhân hóa → TRANH NỀN TỪ BỘ ASSET VIỆT**. Choose Tự động, Không ảnh or one of six illustrations. Use the theme picker for Minimal Zen, Vietnamese Heritage, Luxury Dark, Tết and Mid-Autumn. Existing saved settings remain compatible.
+
+The same appearance is used in in-app previews and Widget Extension. The illustrated backgrounds receive a translucent overlay to keep dates and family events readable. Minimal Zen stays restrained by default.
+
+## WidgetKit
+
+Lunar widgets: Hôm nay âm lịch, Ngày đẹp – việc nhớ, Mùng 1 / Rằm, Ngày giỗ sắp tới, Lịch tháng âm dương, Ngày truyền thống. Additional utilities: budget/expense, tasks, bills, notes, focus timer, Life Command; and custom Living Canvas widgets.
+
+To add a lunar widget: long-press iPhone Home Screen → **Edit → Add Widget → ViePN Widget+** → choose a lunar widget. Size support varies by widget.
+
+## Source and unsigned IPA builds
+
+This is the source repository, including XcodeGen `project.yml` and GitHub Actions workflow `.github/workflows/ios-unsigned-ipa.yml`.
+
+Windows (edit / validate):
 
 ```powershell
-cd ViePN-WidgetPlus-Starter
 python scripts/validate_source.py
-# optionally: pip install pyyaml to enable YAML verification
 code .
 ```
 
-### Publish to GitHub
-
-```powershell
-git init
-git add .
-git commit -m "feat: ViePN Widget+ iOS starter"
-git branch -M main
-git remote add origin https://github.com/YOUR-ACCOUNT/ViePN-WidgetPlus.git
-git push -u origin main
-```
-
-Create the **empty repository** first and replace `YOUR-ACCOUNT` above.
-The included GitHub Action will attempt to build an unsigned iphoneos IPA on a macOS runner;
-check its logs to discover compiler issues.
-
-## On macOS
-
-Install Xcode from Apple, launch it once and accept its license. Install XcodeGen:
+macOS (generate / build):
 
 ```bash
 brew install xcodegen
 xcodegen generate
-open ViePNWidgetPlus.xcodeproj
-```
-
-Select **ViePNWidgetPlus** scheme, configure Signing & Capabilities on *both*
-app and widget targets, and enable the **same App Groups identifier**:
-`group.com.viepn.widgetplus`. Set your own unique Bundle IDs and group in
-`project.yml`, `Shared/Storage/SharedRepository.swift`, and generated entitlements.
-Re-run `xcodegen generate` after changing the project spec.
-
-Unsigned device IPA from Terminal (macOS):
-
-```bash
 bash scripts/build_unsigned_ipa_macos.sh
 ```
 
-Unsigned Simulator build from Terminal:
+GitHub Actions builds on macOS and uploads `ViePN-WidgetPlus-unsigned-IPA` in the run's **Artifacts** section. An unsigned IPA **cannot be installed** on a normal iPhone without valid signing for the app, Widget Extension and matching App Groups entitlements.
 
-```bash
-xcodebuild -project ViePNWidgetPlus.xcodeproj \
-  -scheme ViePNWidgetPlus -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  CODE_SIGNING_ALLOWED=NO build
-```
+## Accuracy and assets
 
-For a physical iPhone or App Store, use a valid Apple Developer team/signing profile.
+The lunar algorithm uses Vietnam timezone UTC+7 and supports leap lunar months. Recurring memorial dates are recalculated from lunar dates for each year. Local notifications are scheduled in a rolling queue and require app refresh because of iOS pending notification limits; a multi-year ICS export is available.
 
-## Using the app
+The 17 art resources are cropped from a **user-provided JPG collage**, not native vector artwork. Transparent PNG edges may retain minor JPEG artifacts. Check artwork distribution rights before App Store release.
 
-1. Open **Explore** and tap a template (or create from **Studio**).
-2. Edit and **save** the widget.
-3. On iPhone Home Screen, long-press and use **Add Widget**.
-4. Find **ViePN Widget+**, add a size, long-press it and select **Edit Widget**.
-5. Choose your saved design. Each installed instance can pick its own design.
-
-## Architecture warning
-
-The project includes functional source paths, but no claim is made that it has been
-compiled in Xcode in this Windows/Linux environment. WeatherKit, lunar calendar,
-AI generation, StoreKit subscriptions, iCloud and Lock Screen widgets are **future
-milestones**, not functioning features of this starter. Photo data is stored in
-App Group local storage; current code does not clean orphaned photo files.
-
-The real iOS experience may require minor API and signing adjustments against your
-selected Xcode / iOS SDK. See `docs/TECHNICAL_SPEC.md` for requirements and QA.
-
-## GitHub Actions unsigned IPA
-
-The workflow `.github/workflows/ios-unsigned-ipa.yml` builds for `iphoneos`, disables
-Xcode code signing, bundles the `.app` and widget `.appex` under `Payload/`, and uploads
-`ViePN-WidgetPlus-unsigned.ipa` as an Actions artifact. Go to **Actions → ViePN
-Widget+ - Unsigned IPA → latest successful run → Artifacts** to download it.
-
-**An unsigned IPA is NOT directly installable on a standard iPhone.** You must sign
-it with an appropriate development or distribution identity and compatible
-provisioning entitlements before installation. This workflow does not publish to
-the App Store and uses no Apple Developer certificates or private keys.
-
-
-## Life OS: widgets hữu ích (2026-11)
-
-Ngoài Living Canvas, phiên bản này có **5 widget độc lập** trong Widget Gallery của iOS:
-
-| Widget | Chức năng trực tiếp | Dữ liệu |
-| --- | --- | --- |
-| Sổ chi tiêu | Ghi khoản chi 20k/50k/100k qua App Intents | VND, ngân sách tháng, các khoản ghi tay |
-| Việc cần làm | Đánh dấu hoàn thành ngay trên widget | Danh sách công việc riêng tư |
-| Hóa đơn | Xem ngày đến hạn, đánh dấu đã thanh toán | Hóa đơn lặp theo tháng (ngày 1–28) |
-| Ghi chú nhanh | Xem ghi chú gần nhất, chạm mở ViePN | Ghi chú cục bộ, có tùy chọn che nội dung |
-| Deep Focus | Bắt đầu/dừng phiên 25 phút, đếm ngược | Phiên tập trung cục bộ |
-
-Trong ứng dụng, mở tab **Tiện ích (Life OS)** để nhập dữ liệu, quản lý ngân sách và tạo các mục. Widget Extension truy cập bản sao dữ liệu cục bộ bằng **App Groups**. Không có kết nối ngân hàng, không truy cập SMS, không đọc tin nhắn hay thực hiện thanh toán. Việc cập nhật widget phụ thuộc cơ chế điều phối của iOS; bộ đếm giờ dùng hiển thị thời gian của hệ thống.
-
-### Lưu ý về dữ liệu và quyền riêng tư
-
-- Dữ liệu được nhập thủ công và lưu trên thiết bị bằng UserDefaults trong App Group; bản prototype chưa có Cloud Sync hay mã hóa riêng cho từng bản ghi.
-- Mặc định số tiền và ghi chú có thể hiển thị trên màn hình chính. Tắt **Hiện nội dung riêng tư trên widget** trong Life OS để che các thông tin này.
-- Tính năng hóa đơn chỉ **theo dõi**, không trừ tiền tự động hay gửi thông báo nhắc hạn trong bản này.
-- Các nút ghi chi tiêu được thiết kế một chạm. Chỉ sử dụng dữ liệu thử nghiệm trước khi lưu thông tin thật.
-
-### Hướng dẫn build
-
-- Windows: chạy `python scripts/validate_source.py` và chỉnh sửa code trong VS Code/Codex.
-- macOS/Xcode: `brew install xcodegen`, `xcodegen generate`, chạy scheme `ViePNWidgetPlus`.
-- GitHub Actions: workflow `ios-unsigned-ipa.yml` compile Simulator và thiết bị, sau đó đóng gói IPA chưa ký. Unsigned IPA không cài được bằng cách thông thường nếu chưa ký lại cả app và widget extension.
-
-## Lịch Âm Tĩnh — v2.2
-
-A Vietnamese family lunar calendar module using fixed **Vietnam UTC+7** dates and the Hồ Ngọc Đức / Jean Meeus astronomical approximation (1900–2100). It is not a China UTC+8 calendar.
-
-- 6 WidgetKit families: today, next family event, new/full moon countdown, memorial, lunar-solar month, traditional details; Home/Lock Screen supported where appropriate.
-- Minimal Zen (default), Vietnamese Heritage, Luxury Dark, Tết and Mid-Autumn visual themes. Existing stored themes remain decodable.
-- Local recurring lunar memorials with explicit leap-month and missing-day-30 rules, notifications and 10-year `.ics` calendar export.
-- Day / week / month / year views, Can Chi, 24 solar terms (approximate transition-day calculations), traditional day information and festival notes.
-- iOS widget timeline refresh is controlled by WidgetKit. App reminders are reprojected when the app is opened or events change; for multi-year reliability, export the generated ICS and add it to a calendar.
-
-Quick test on Windows with Swift installed or on GitHub macOS runner:
-
-```bash
-bash scripts/run_lunar_smoke.sh
-```
-
-**Accuracy caveat:** Astronomical approximations can differ near midnight new-moons; before marketing the calculator as an authoritative almanac, reconcile against a published Vietnamese reference calendar and add regression fixtures for rare edge dates (notably years 2072 / 2085). Geomancy, lucky hours and good/bad days are presented strictly as traditional culture and may vary by school.
+More details: `docs/HERITAGE_ASSETS.md`, `docs/TECHNICAL_SPEC.md` and `docs/ROADMAP.md`.
