@@ -442,24 +442,38 @@ struct LunarCardView: View {
         .lineLimit(1)
     }
 
+    /// Native text badge instead of scaling the tiny badge cropped from the
+    /// original JPG sprite sheet. Remains crisp at @2x/@3x on iPhone.
+    private var crispBadgeTitle: String? {
+        if lunar?.isLeapMonth == true { return "THÁNG NHUẬN" }
+        if kind == .memorial, nextFamily != nil, appearance.showFamilyEvents { return "NGÀY GIỖ" }
+        if lunar?.day == 1 { return "MÙNG MỘT" }
+        if lunar?.day == 15 { return "NGÀY RẰM" }
+        return nil
+    }
+
     private var footer: some View {
         HStack {
-            if appearance.showOrnament && theme != .zen,
-               let status = LunarHeritageArt.statusBadge(kind: kind, lunar: lunar,
-                                                          hasFamilyEvent: nextFamily != nil && appearance.showFamilyEvents) {
-                Image(status)
-                    .resizable().scaledToFit().frame(width: 92, height: 25)
-                    .accessibilityLabel(lunar?.isLeapMonth == true ? "Tháng nhuận" : kind == .memorial ? "Ngày giỗ" : lunar?.day == 1 ? "Mùng một" : "Ngày rằm")
-            } else if lunar?.isLeapMonth == true {
-                Text("THÁNG NHUẬN").font(.system(size: 9, weight: .semibold)).foregroundStyle(accent)
-            } else if lunar?.day == 1 || lunar?.day == 15 {
-                Text(lunar?.day == 15 ? "NGÀY RẰM" : "MÙNG MỘT")
-                    .font(.system(size: 9, weight: .semibold)).foregroundStyle(accent)
+            if let label = crispBadgeTitle {
+                Text(label)
+                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                    .tracking(0.6)
+                    .foregroundStyle(accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(accent.opacity(0.10), in: Capsule())
+                    .overlay(Capsule().stroke(accent.opacity(0.36), lineWidth: 0.8))
             } else {
-                Text("VIỆT NAM · UTC+7").font(.system(size: 9, weight: .medium)).tracking(0.8).foregroundStyle(muted)
+                Text("VIỆT NAM · UTC+7")
+                    .font(.system(size: 9, weight: .medium))
+                    .tracking(0.6)
+                    .foregroundStyle(muted)
             }
             Spacer(minLength: 0)
-            Text("VIEPN").font(.system(size: 9, weight: .medium)).tracking(1.2).foregroundStyle(muted)
+            Text("VIEPN")
+                .font(.system(size: 9, weight: .medium))
+                .tracking(1.0)
+                .foregroundStyle(muted)
         }
     }
 
