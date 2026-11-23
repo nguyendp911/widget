@@ -93,17 +93,25 @@ private struct UtilityWidgetView: View {
 
     private var compact: Bool { family == .systemSmall }
     private var snap: UtilitySnapshot { entry.snapshot }
-    private var mint: Color { Color(hex: "#5DE9D8") }
-    private var muted: Color { Color(hex: "#A8B6CD") }
+    private var mint: Color { Color(hex: "#F2D28B") }
+    private var muted: Color { Color(hex: "#F1D6BA") }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 6) {
-                Image(systemName: icon).foregroundStyle(mint)
-                Text(title.uppercased()).font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(1).lineLimit(1)
+                Image("ViePNIcon" + heritageIconName)
+                    .resizable().scaledToFit()
+                    .frame(width: compact ? 25 : 29, height: compact ? 25 : 29)
+                Text(title.uppercased())
+                    .font(.system(size: compact ? 10 : 12, weight: .semibold, design: .serif))
+                    .tracking(0.5)
+                    .lineLimit(1)
                 Spacer(minLength: 0)
             }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(Color(hex: "#6A1B19").opacity(0.80), in: Capsule())
+            .overlay(Capsule().stroke(Color(hex: "#DBAF5A").opacity(0.7), lineWidth: 0.8))
             Spacer(minLength: 0)
             switch type {
             case .money: money
@@ -114,8 +122,9 @@ private struct UtilityWidgetView: View {
             }
             Spacer(minLength: 0)
             HStack {
-                Text("VIEPN / LIFE OS").font(.system(size: 8, weight: .heavy, design: .rounded))
-                    .tracking(1).foregroundStyle(muted)
+                Text("VIEPN · TIỆN ÍCH VIỆT")
+                    .font(.system(size: 8, weight: .semibold, design: .serif))
+                    .tracking(0.7).foregroundStyle(muted)
                 Spacer(minLength: 0)
             }
         }
@@ -123,10 +132,47 @@ private struct UtilityWidgetView: View {
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .containerBackground(for: .widget) {
-            LinearGradient(colors: [Color(hex: "#152E38"), Color(hex: "#101426"), Color(hex: "#090C17")],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            GeometryReader { geo in
+                ZStack {
+                    Color(hex: "#123E34")
+                    Image(heritageBackground)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                    LinearGradient(
+                        colors: [Color(hex: "#123F36").opacity(0.97),
+                                 Color(hex: "#153C36").opacity(0.86),
+                                 Color(hex: "#12302C").opacity(0.42)],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color(hex: "#E6B766").opacity(0.63), lineWidth: 1.2)
+                        .padding(3)
+                }
+            }
         }
         .widgetURL(type == .notes ? URL(string: "viepnwidgetplus://notes") : nil)
+    }
+
+    private var heritageBackground: String {
+        let suffix = compact ? "Small" : "Medium"
+        switch type {
+        case .money: return "ViePNTrongDong" + suffix
+        case .tasks: return "ViePNSenNgoc" + suffix
+        case .bills: return "ViePNXuanViet" + suffix
+        case .notes: return "ViePNSenNgoc" + suffix
+        case .focus: return "ViePNTrangTre" + suffix
+        }
+    }
+    private var heritageIconName: String {
+        switch type {
+        case .money: return "GoodDay"
+        case .tasks: return "GoodHours"
+        case .bills: return "Calendar"
+        case .notes: return "Books"
+        case .focus: return "SolarTerm"
+        }
     }
 
     private var title: String {
