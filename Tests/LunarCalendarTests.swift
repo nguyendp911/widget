@@ -11,6 +11,31 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertNil(LunarArtwork.none.resolvedResource(theme: .heritage))
     }
 
+    func testApprovedHeritageHasUniqueArtworkForEachWidgetKind() {
+        let appearance = LunarAppearance()
+        let expected: [(LunarCardKind, String)] = [
+            (.today, "ViePNTrongDongMedium"),
+            (.nextEvent, "ViePNSenNgocMedium"),
+            (.moonDays, "ViePNTrangTreMedium"),
+            (.memorial, "ViePNGioNhaMedium"),
+            (.month, "ViePNCongLangMedium"),
+            (.tradition, "ViePNCucVangMedium"),
+            (.almanac, "ViePNVanNienMedium")
+        ]
+        for (kind, asset) in expected {
+            let skin = LunarWidgetSkin(kind: kind, appearance: appearance)
+            XCTAssertEqual(skin.artworkName(family: "Medium"), asset)
+        }
+        XCTAssertTrue(LunarWidgetSkin(kind: .today, appearance: appearance).dark)
+        XCTAssertTrue(LunarWidgetSkin(kind: .memorial, appearance: appearance).dark)
+        XCTAssertFalse(LunarWidgetSkin(kind: .almanac, appearance: appearance).dark)
+
+        var custom = appearance
+        custom.artwork = .spring
+        XCTAssertEqual(LunarWidgetSkin(kind: .memorial, appearance: custom)
+            .artworkName(family: "Large"), "ViePNXuanVietLarge")
+    }
+
     func testAlmanacFactsHaveConsistentTraditionalData() {
         let civil = SolarCivilDate(year: 2026, month: 11, day: 23)
         let facts = LunarAlmanacFacts(civil)

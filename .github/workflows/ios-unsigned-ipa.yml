@@ -53,6 +53,44 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing 2>&1 | tee "$RUNNER_TEMP/viepn-tests-build.log"
 
+      - name: Capture actual Lịch Âm screen in iPhone Simulator
+        # A real screenshot is needed to compare with the approved Vietnamese design.
+        # UI screenshots are supplementary, never substitute for an IPA build.
+        timeout-minutes: 6
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/ViePNTestsDerivedData/Build/Products/Debug-iphonesimulator/ViePNWidgetPlus.app"
+          test -d "$APP"
+          UDID=$(xcrun simctl list devices available --json | python3 -c '
+          import sys, json
+          devices = json.load(sys.stdin)["devices"]
+          matches = [d["udid"] for arr in devices.values() for d in arr
+                     if d.get("isAvailable") and d.get("name", "").startswith("iPhone")]
+          print(matches[0] if matches else "")
+          ')
+          test -n "$UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --batteryState charged --batteryLevel 100 || true
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.viepn.widgetplus
+          xcrun simctl openurl "$UDID" 'viepnwidgetplus://lunar?date=2026-11-23'
+          sleep 6
+          mkdir -p screenshots
+          xcrun simctl io "$UDID" screenshot screenshots/ViePN-Lich-Am-Heritage-iPhone.png
+          file screenshots/ViePN-Lich-Am-Heritage-iPhone.png
+
+      - name: Upload design parity screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViePN-Lunar-UI-Screenshot
+          path: screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Build unsigned device app
         shell: bash
         run: |
