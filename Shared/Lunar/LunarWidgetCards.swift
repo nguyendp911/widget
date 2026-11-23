@@ -39,9 +39,10 @@ struct LunarCardView: View {
 
     private var theme: LunarTheme { appearance.theme }
     private var dateDesign: Font.Design { appearance.useSerif ? .serif : .rounded }
-    private var ink: Color { Color(hex: theme.foreground) }
-    private var muted: Color { Color(hex: theme.muted) }
-    private var accent: Color { Color(hex: theme.accent) }
+    private var skin: LunarWidgetSkin { LunarWidgetSkin(kind: kind, appearance: appearance) }
+    private var ink: Color { skin.text }
+    private var muted: Color { skin.softText }
+    private var accent: Color { skin.accent }
     private var lunar: VietnameseLunarDate? { VietnameseLunarCalendar.solarToLunar(civil) }
     private var nextFamily: LunarEventOccurrence? { upcomingEvents.first }
     private var nextMoon: LunarUpcomingFestival? { LunarHighlights.nextObservance(from: civil) }
@@ -55,7 +56,7 @@ struct LunarCardView: View {
             } else {
                 ZStack(alignment: .topTrailing) {
                     if drawsOwnBackground {
-                        LunarHeritageBackground(appearance: appearance, family: size.assetFamily)
+                        LunarHeritageBackground(appearance: appearance, family: size.assetFamily, kind: kind)
                     }
                     if appearance.showOrnament && appearance.artwork == .none {
                         if let ornament = LunarHeritageArt.ornament(for: theme) {
@@ -99,13 +100,26 @@ struct LunarCardView: View {
         .accessibilityElement(children: .combine)
     }
 
+    private var headingTitle: String {
+        switch kind {
+        case .today: return "HÔM NAY ÂM LỊCH"
+        case .nextEvent: return "NGÀY ĐẸP · VIỆC NHỚ"
+        case .moonDays: return "MÙNG MỘT · NGÀY RẰM"
+        case .memorial: return "NGÀY GIỖ SẮP TỚI"
+        case .month: return "LỊCH THÁNG VẠN NIÊN"
+        case .tradition: return "NGÀY TRUYỀN THỐNG"
+        case .almanac: return "CAN CHI · TIẾT KHÍ"
+        }
+    }
+
     private var heading: some View {
         HStack(spacing: 6) {
             LunarVectorHeader(
-                title: kind == .almanac ? "LỊCH VẠN NIÊN · CAN CHI" : "LỊCH ÂM TĨNH",
+                title: headingTitle,
                 theme: theme,
                 compact: size == .small || size == .medium,
-                glyph: kind == .almanac ? .zodiac : .calendar
+                glyph: kind == .almanac ? .zodiac : kind == .memorial ? .memorial : .calendar,
+                darkVariant: skin.dark
             )
             if isSpecial && size == .small {
                 Circle()
@@ -348,33 +362,33 @@ struct LunarCardView: View {
                 HStack(alignment: .top, spacing: 9) {
                     LunarVectorFact(
                         glyph: .canChi, title: "CAN CHI THÁNG / NĂM",
-                        value: "\(facts.canChiMonth) / \(facts.canChiYear)", theme: theme)
+                        value: "\(facts.canChiMonth) / \(facts.canChiYear)", theme: theme, darkVariant: skin.dark)
                     LunarVectorFact(
                         glyph: .spirit, title: "SAO · TRỰC",
-                        value: "\(facts.spirit) · \(facts.officer)", theme: theme)
+                        value: "\(facts.spirit) · \(facts.officer)", theme: theme, darkVariant: skin.dark)
                 }
                 HStack(alignment: .top, spacing: 9) {
                     LunarVectorFact(
                         glyph: .solarTerm, title: "TIẾT KHÍ",
-                        value: facts.solarTerm, theme: theme)
+                        value: facts.solarTerm, theme: theme, darkVariant: skin.dark)
                     LunarVectorFact(
                         glyph: .calendar, title: "NGÀY TỐT – XẤU",
-                        value: facts.dayKind, theme: theme)
+                        value: facts.dayKind, theme: theme, darkVariant: skin.dark)
                 }
                 LunarVectorInline(
                     glyph: .goodHours,
-                    value: "Giờ hoàng đạo: " + facts.goodHoursLabel, theme: theme
+                    value: "Giờ hoàng đạo: " + facts.goodHoursLabel, theme: theme, darkVariant: skin.dark
                 )
                 LunarVectorInline(
                     glyph: .zodiac,
                     value: "Tử vi dân gian: ngày \(facts.dayAnimalName) · tuổi xung \(facts.opposingAnimalName)",
-                    theme: theme
+                    theme: theme, darkVariant: skin.dark
                 )
                 if appearance.showFamilyEvents, let event = nextFamily {
                     LunarVectorInline(
                         glyph: .family,
                         value: "\(event.title) · còn \(event.daysRemaining(from: civil)) ngày",
-                        theme: theme
+                        theme: theme, darkVariant: skin.dark
                     )
                 }
             }
@@ -400,17 +414,17 @@ struct LunarCardView: View {
                 LunarVectorInline(
                     glyph: .spirit,
                     value: facts.dayKind + " · " + facts.spirit + " · Trực " + facts.officer,
-                    theme: theme
+                    theme: theme, darkVariant: skin.dark
                 )
                 LunarVectorInline(
                     glyph: .solarTerm,
                     value: facts.solarTerm + " · Giờ tốt: " + facts.goodHoursLabel,
-                    theme: theme
+                    theme: theme, darkVariant: skin.dark
                 )
                 LunarVectorInline(
                     glyph: .zodiac,
                     value: "Tuổi ngày: " + facts.dayAnimalName + " · Xung: " + facts.opposingAnimalName,
-                    theme: theme
+                    theme: theme, darkVariant: skin.dark
                 )
             }
         }
