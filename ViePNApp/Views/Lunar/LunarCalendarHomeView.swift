@@ -34,24 +34,7 @@ struct LunarCalendarHomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 23) {
                 hero
-                HStack(spacing: 9) {
-                    LunarHeritageIconButton(image: "HeritageActionCalendar", fallback: "calendar", label: "Xem hôm nay") {
-                        selected = today
-                        mode = .day
-                    }
-                    LunarHeritageIconButton(image: "HeritageActionFamily", fallback: "person.2", label: "Thêm ngày giỗ") {
-                        addingEvent = true
-                    }
-                    LunarHeritageIconButton(image: "HeritageActionBell", fallback: "bell", label: "Bật nhắc việc") {
-                        Task { await family.enableNotifications() }
-                    }
-                    Spacer(minLength: 0)
-                    Text("NHỚ NGÀY · GIỮ TÌNH THÂN")
-                        .font(.system(size: 9, weight: .semibold)).foregroundStyle(accent)
-                        .lineLimit(2)
-                }
-                .padding(10)
-                .background(panel, in: RoundedRectangle(cornerRadius: 15))
+                heritageShortcuts
                 widgetShowcase
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("TRA CỨU LỊCH", subtitle: "Từng ngày, từng tháng âm dương")
@@ -140,6 +123,38 @@ struct LunarCalendarHomeView: View {
         }
     }
 
+    private var heritageShortcuts: some View {
+        HStack(alignment: .top, spacing: 8) {
+            heritageShortcut("Hôm nay", icon: "HeritageActionCalendar") {
+                selected = today
+                mode = .day
+            }
+            heritageShortcut("Ngày giỗ", icon: "HeritageActionFamily") {
+                addingEvent = true
+            }
+            heritageShortcut("Nhắc việc", icon: "HeritageActionBell") {
+                Task { await family.enableNotifications() }
+            }
+            heritageShortcut("Xem năm", icon: "HeritageActionCulture") {
+                mode = .year
+            }
+        }
+        .padding(.vertical, 8)
+        .background(panel.opacity(0.7), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func heritageShortcut(_ label: String, icon: String, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 2) {
+            LunarHeritageActionButton(assetName: icon, accessibilityTitle: label, action: action)
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(muted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private var widgetShowcase: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionLabel("LỊCH ÂM TĨNH", subtitle: "Widget trang nhã cho màn hình iPhone")
@@ -187,8 +202,13 @@ struct LunarCalendarHomeView: View {
             if let lunar {
                 let special = LunarCulture.observances(on: lunar)
                 if !special.isEmpty {
-                    Label(special.joined(separator: " · "), systemImage: "circle.fill")
-                        .font(.system(size: 11, weight: .medium)).foregroundStyle(accent)
+                    HStack(spacing: 8) {
+                        if let festival = LunarCulture.on(lunar).first {
+                            LunarHeritageFestivalIllustration(festivalTitle: festival.title, size: 34)
+                        }
+                        Text(special.joined(separator: " · "))
+                            .font(.system(size: 11, weight: .medium)).foregroundStyle(accent)
+                    }
                 }
             }
             DisclosureGroup("Can Chi · tiết khí · giờ hoàng đạo") {
@@ -262,13 +282,13 @@ struct LunarCalendarHomeView: View {
             HStack {
                 sectionLabel("NHỮNG NGÀY KHÔNG QUÊN", subtitle: "Giỗ, kỷ niệm và những người thân yêu")
                 Spacer()
-                LunarHeritageIconButton(image: "HeritageNavAdd", fallback: "plus", label: "Thêm ngày giỗ") {
+                LunarHeritageActionButton(assetName: "HeritageNavAdd", accessibilityTitle: "Thêm ngày giỗ") {
                     addingEvent = true
                 }
             }
             if family.events.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
-                    Image("HeritageLotus").resizable().scaledToFit().frame(width: 48, height: 48)
+                    Image(LunarHeritageComponents.imageOrFallback("HeritageActionFamily")).resizable().scaledToFit().frame(width: 44, height: 44)
                     Text("Giữ một ngày, nhớ cả một đời.")
                         .font(.system(size: 20, weight: .regular, design: .serif))
                     Text("Thêm ngày giỗ hoặc kỷ niệm âm lịch để được nhắc đúng mỗi năm.")
@@ -283,8 +303,8 @@ struct LunarCalendarHomeView: View {
                             editingEvent = family.events.first(where: { $0.id == item.eventID })
                         } label: {
                             HStack(spacing: 12) {
-                                Image(item.kind == .memorial ? "HeritageGate" : "HeritageLotus")
-                                    .resizable().scaledToFit().frame(width: 28, height: 28)
+                                Image(LunarHeritageComponents.imageOrFallback(item.kind == .memorial ? "HeritageFestivalGioChap" : "HeritageActionFamily"))
+                                    .resizable().scaledToFit().frame(width: 30, height: 30)
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(item.title).font(.system(size: 13, weight: .semibold)).foregroundStyle(ink).lineLimit(1)
                                     Text("Âm \(item.lunar.day)/\(item.lunar.month) · \(item.solar.label)")
@@ -405,13 +425,16 @@ struct LunarCalendarHomeView: View {
             sectionLabel("VĂN HÓA VIỆT", subtitle: "Phong tục và ý nghĩa ngày lễ")
             ForEach(LunarCulture.festivals) { festival in
                 HStack(alignment: .top, spacing: 10) {
-                    if let picture = LunarHeritageUI.art(festival.title) {
-                        Image(picture).resizable().scaledToFit().frame(width: 36, height: 36)
-                    }
+                    LunarHeritageFestivalIllustration(festivalTitle: festival.title, size: 39)
                     DisclosureGroup("\(festival.title) · \(festival.day)/\(festival.month) âm") {
-                        Text(festival.description).font(.system(size: 12)).foregroundStyle(muted).padding(.top, 5)
-                    }.font(.system(size: 12, weight: .medium))
+                        Text(festival.description)
+                            .font(.system(size: 12))
+                            .foregroundStyle(muted)
+                            .padding(.top, 5)
+                    }
+                    .font(.system(size: 12, weight: .medium))
                 }
+                .padding(.vertical, 4)
                 if festival.id != LunarCulture.festivals.last?.id { Divider().opacity(0.25) }
             }
         }.padding(16).background(panel, in: RoundedRectangle(cornerRadius: 20))
@@ -419,22 +442,23 @@ struct LunarCalendarHomeView: View {
 
     private func sectionLabel(_ overline: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                Image("HeritageDongSon").resizable().scaledToFit().frame(width: 22, height: 22)
-                Text(overline).font(.system(size: 10, weight: .semibold))
-                    .tracking(1.2).foregroundStyle(accent)
-            }
-            Text(subtitle).font(.system(size: 14, weight: .medium, design: .serif)).foregroundStyle(ink)
-            Rectangle().fill(accent.opacity(0.15)).frame(height: 1)
+            LunarHeritageSectionTitle(title: overline, theme: theme)
+            Text(subtitle)
+                .font(.system(size: 14, weight: .medium, design: .serif))
+                .foregroundStyle(ink)
+            if theme != .zen { LunarHeritagePatternDivider(theme: theme) }
         }
     }
     private func navigationHeader(title: String, back: @escaping () -> Void, forward: @escaping () -> Void) -> some View {
         HStack {
-            LunarHeritageIconButton(image: "HeritageNavPrev", fallback: "chevron.left", label: "Trước", action: back)
-            Spacer(minLength: 4)
-            Text(title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
-            Spacer(minLength: 4)
-            LunarHeritageIconButton(image: "HeritageNavNext", fallback: "chevron.right", label: "Sau", action: forward)
+            LunarHeritageActionButton(assetName: "HeritageNavPrev", accessibilityTitle: "Ngày trước", action: back)
+            Spacer(minLength: 5)
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 5)
+            LunarHeritageActionButton(assetName: "HeritageNavNext", accessibilityTitle: "Ngày sau", action: forward)
         }
     }
     private func appearanceBinding(_ keyPath: WritableKeyPath<LunarAppearance, Bool>) -> Binding<Bool> {

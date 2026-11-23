@@ -89,20 +89,29 @@ struct LunarCardView: View {
     }
 
     private var heading: some View {
-        HStack(spacing: 6) {
-            if theme == .zen {
-                Image(systemName: "moon.phase.waning.crescent")
-                    .font(.system(size: 11, weight: .medium)).foregroundStyle(accent)
+        Group {
+            if size != .small && theme != .zen {
+                LunarHeritageSectionTitle(title: "LỊCH ÂM TĨNH", theme: theme)
+                    .frame(height: 28)
             } else {
-                Image("HeritageDongSon").resizable().scaledToFit().frame(width: 17, height: 17)
-            }
-            Text("LỊCH ÂM TĨNH")
-                .font(.system(size: 9, weight: .semibold, design: .rounded))
-                .tracking(1.5).foregroundStyle(muted)
-            Spacer(minLength: 0)
-            if isSpecial {
-                Circle().fill(accent).frame(width: 5, height: 5)
-                    .accessibilityLabel("Ngày âm lịch đặc biệt")
+                HStack(spacing: 6) {
+                    if theme != .zen {
+                        Image(LunarHeritageComponents.imageOrFallback("HeritageActionCalendar"))
+                            .resizable().scaledToFit().frame(width: 18, height: 18)
+                    } else {
+                        Image(systemName: "moon.phase.waning.crescent")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(accent)
+                    }
+                    Text("LỊCH ÂM TĨNH")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .tracking(1.5).foregroundStyle(muted)
+                    Spacer(minLength: 0)
+                    if isSpecial {
+                        Circle().fill(accent).frame(width: 5, height: 5)
+                            .accessibilityLabel("Ngày âm lịch đặc biệt")
+                    }
+                }
             }
         }
     }
@@ -189,8 +198,12 @@ struct LunarCardView: View {
     private var memorialBody: some View {
         VStack(alignment: .leading, spacing: 7) {
             if let event = nextFamily, appearance.showFamilyEvents {
-                Image(event.kind == .memorial ? "HeritageGate" : "HeritageLotus")
-                    .resizable().scaledToFit().frame(width: 24, height: 24)
+                HStack(spacing: 8) {
+                    Image(LunarHeritageComponents.imageOrFallback(event.kind == .memorial ? "HeritageFestivalGioChap" : "HeritageActionFamily"))
+                        .resizable().scaledToFit().frame(width: 28, height: 28)
+                    Text(event.kind == .memorial ? "NGÀY GIỖ GIA ĐÌNH" : "SỰ KIỆN GIA ĐÌNH")
+                        .font(.system(size: 9, weight: .semibold)).foregroundStyle(muted)
+                }
                 Text(event.title).font(.system(size: size == .small ? 18 : 26, weight: .medium, design: .serif))
                     .lineLimit(2).minimumScaleFactor(0.75)
                 Text("\(event.daysRemaining(from: civil))")
@@ -210,7 +223,9 @@ struct LunarCardView: View {
 
     private var monthBody: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 7) {
+                Image(LunarHeritageComponents.imageOrFallback("HeritageActionCalendar"))
+                    .resizable().scaledToFit().frame(width: 24, height: 24)
                 Text("THÁNG \(civil.month) / \(civil.year)")
                     .font(.system(size: 15, weight: .semibold, design: .serif))
                 Spacer()
@@ -256,6 +271,13 @@ struct LunarCardView: View {
 
     private var traditionBody: some View {
         VStack(alignment: .leading, spacing: 7) {
+            if let lunar, let festival = LunarCulture.on(lunar).first {
+                HStack(spacing: 7) {
+                    LunarHeritageFestivalIllustration(festivalTitle: festival.title, size: 30)
+                    Text(festival.title).font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(accent).lineLimit(1)
+                }
+            }
             Text("\(lunar?.day ?? 0) tháng \(lunar?.month ?? 0) âm")
                 .font(.system(size: size == .small ? 19 : 26, weight: .medium, design: .serif))
                 .foregroundStyle(accent)

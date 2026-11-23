@@ -48,3 +48,9 @@ The lunar algorithm uses Vietnam timezone UTC+7 and supports leap lunar months. 
 The 17 art resources are cropped from a **user-provided JPG collage**, not native vector artwork. Transparent PNG edges may retain minor JPEG artifacts. Check artwork distribution rights before App Store release.
 
 More details: `docs/HERITAGE_ASSETS.md`, `docs/TECHNICAL_SPEC.md` and `docs/ROADMAP.md`.
+
+
+## Lịch Âm Tĩnh — Heritage UI v2.2.7
+The user's original Vietnamese asset sheet is now represented by 17 original illustrated assets plus 33 additional cropped assets, in both the iOS app and Widget Extension. Assets include 6 background panels, 4 status badges, 7 ornamental motifs, 10 function icons, 10 festival pictograms, 3 title ribbons, 6 navigation images and 4 decorative patterns. These are dynamic UI components, not only backgrounds.
+
+Run `python3 scripts/validate_heritage_kit.py` to verify all 33 new imagesets. GitHub Actions also verifies representative names in the built App and Widget Extension Assets.car before packaging the unsigned IPA.
