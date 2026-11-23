@@ -12,12 +12,20 @@ struct LunarWidgetSkin {
     init(kind: LunarCardKind, appearance: LunarAppearance) {
         self.kind = kind
         self.appearance = appearance
-        if appearance.theme == .heritage && appearance.artwork == .automatic {
-            switch kind {
-            case .today: tone = .lacquer
-            case .moonDays: tone = .night
-            case .memorial, .nextEvent: tone = .jade
-            case .month, .tradition, .almanac: tone = .parchment
+        if appearance.theme == .heritage {
+            switch appearance.artwork {
+            case .automatic:
+                switch kind {
+                case .today: tone = .lacquer
+                case .moonDays: tone = .night
+                case .memorial: tone = .jade
+                case .nextEvent, .month, .tradition, .almanac: tone = .parchment
+                }
+            case .drum: tone = .lacquer
+            case .lotus: tone = .jade
+            case .moon: tone = .night
+            case .none, .spring, .temple, .chrysanthemum, .vanNien, .gioNha:
+                tone = .parchment
             }
         } else {
             tone = .custom
@@ -62,8 +70,8 @@ struct LunarWidgetSkin {
             switch kind {
             case .today: scene = .drum
             case .moonDays: scene = .moon
-            case .memorial: scene = .gioNha
-            case .nextEvent: scene = .lotus
+            case .memorial: scene = .lotus
+            case .nextEvent: scene = .gioNha
             case .month: scene = .temple
             case .tradition: scene = .chrysanthemum
             case .almanac: scene = .vanNien
