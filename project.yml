@@ -23,6 +23,8 @@ targets:
       path: ViePNApp/Info.plist
       properties:
         CFBundleDisplayName: "ViePN Widget+"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -50,6 +52,8 @@ targets:
       path: WidgetExtension/Info.plist
       properties:
         CFBundleDisplayName: "ViePN Widgets"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
