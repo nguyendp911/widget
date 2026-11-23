@@ -82,10 +82,9 @@ struct RootTabView: View {
                 familyEvents: lunarFamily.events
             )
         }
-        #if DEBUG
         .onAppear {
-            // Simulator screenshot mode for visually verifying the actual modal.
-            // The flag is excluded from the Release iPhone build.
+            #if DEBUG
+            // Only installed in Debug for Simulator screenshot inspection.
             if let key = ProcessInfo.processInfo.environment["VIEPN_PREVIEW_MODAL"],
                let section = ThienNienSection(rawValue: key) {
                 tab = .lunar
@@ -95,7 +94,7 @@ struct RootTabView: View {
                         ?? SolarCivilDate(year: 2026, month: 11, day: 23)
                 )
             }
+            #endif
         }
-        #endif
     }
 }
