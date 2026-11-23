@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject private var studio: WidgetStudioStore
+    @EnvironmentObject private var tools: UtilityStore
 
     var body: some View {
         StudioPage {
@@ -22,6 +23,21 @@ struct DashboardView: View {
                         .font(.title2).foregroundStyle(StudioPalette.mint)
                         .frame(width: 49, height: 49)
                         .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 16))
+                }
+                StudioPanel {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("HÔM NAY / LIFE OS")
+                            .font(.system(size: 11, weight: .heavy)).tracking(1.7)
+                            .foregroundStyle(StudioPalette.mint)
+                        HStack(spacing: 12) {
+                            metric("Ngân sách còn", value: tools.snapshot.revealOnWidgets ? tools.snapshot.remainingBudget().viepnVND : "••••••", icon: "creditcard")
+                            metric("Việc cần làm", value: "\(tools.snapshot.pendingTasks.count) việc", icon: "checkmark.circle")
+                        }
+                        if let bill = tools.snapshot.nextUnpaidBill() {
+                            Label("\(bill.name): còn \(bill.daysUntilDue(from: .now)) ngày", systemImage: "bell.badge")
+                                .font(.caption).foregroundStyle(StudioPalette.muted)
+                        }
+                    }
                 }
                 NavigationLink {
                     WidgetEditorView(design: SampleTemplates.catalog[1].duplicate())
@@ -113,5 +129,15 @@ struct DashboardView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { tools.refresh() }
+    }
+
+    private func metric(_ name: String, value: String, icon: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(name, systemImage: icon).font(.system(size: 10)).foregroundStyle(StudioPalette.muted)
+            Text(value).font(.system(size: 17, weight: .bold, design: .rounded))
+                .lineLimit(1).minimumScaleFactor(0.6).foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

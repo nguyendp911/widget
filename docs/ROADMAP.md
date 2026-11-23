@@ -24,3 +24,24 @@
 - [ ] iCloud sync, subscriptions and StoreKit verification.
 - [ ] Calendar/Weather permissions and integration, lock screen families.
 - [ ] One-tap icon installs are not possible via public iOS APIs.
+
+
+## Product direction: ViePN Life OS / utility-first
+
+### Implemented in this source
+- Expense tracking, quick actions, monthly budget (manual recording; not bank linked).
+- Checklist with App Intent toggles.
+- Recurring bill tracking with paid/unpaid state.
+- Quick notes and app deep link, with privacy switch for content shown on the Home screen.
+- 25/50-minute Focus session and interactive Focus widget.
+- Today summary combining remaining budget, open tasks, upcoming bill.
+
+### Planned, not implemented yet
+- Local notification scheduling for due bills and finished focus sessions (permission flow and tests required).
+- Package tracking by consented official carrier integrations (requires provider APIs and credentials).
+- Parking locator and saved location (requires location permission, maps UI, battery/privacy review).
+- Safe QR utilities: offline QR generation and scanning (camera permission), copy/share instead of silent payments.
+- Health integration only when HealthKit permission is explicitly granted.
+- App Shortcuts and a configurable quick-action toolbar.
+- Secure iCloud sync and migration from App Groups JSON to a transactional shared storage solution.
+- Accessibility, VoiceOver, dynamic text sizing, localization, real-device QA and App Store privacy review.

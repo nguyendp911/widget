@@ -129,5 +129,10 @@ struct ViePNStudioWidget: Widget {
 struct ViePNWidgetBundle: WidgetBundle {
     var body: some Widget {
         ViePNStudioWidget()
+        ViePNMoneyWidget()
+        ViePNTasksWidget()
+        ViePNBillsWidget()
+        ViePNNotesWidget()
+        ViePNFocusWidget()
     }
 }
