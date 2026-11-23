@@ -1,0 +1,103 @@
+name: ViePN Widget+ - Unsigned IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unsigned-ipa:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # First upload includes a compressed source archive because the linked
+      # GitHub connector uploads text and Git blobs separately. On the first
+      # run, unpack and commit the actual editable files into main.
+      - name: Restore source on first push
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f .viepn-source.tar.xz ]]; then
+            python3 - <<'PY'
+          from pathlib import Path
+          import tarfile
+          with tarfile.open('.viepn-source.tar.xz', 'r:xz') as archive:
+              for item in archive.getmembers():
+                  p = Path(item.name)
+                  if p.is_absolute() or '..' in p.parts:
+                      raise ValueError(f'Unsafe archive path: {item.name}')
+              archive.extractall('.')
+          PY
+            rm .viepn-source.tar.xz
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -A
+            git commit -m 'feat: unpack ViePN Widget+ SwiftUI sources'
+            git push origin HEAD:main
+          fi
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Validate starter
+        run: python3 scripts/validate_source.py
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build unsigned device app
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ViePNWidgetPlus.xcodeproj \
+            -scheme ViePNWidgetPlus \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/ViePNDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee "$RUNNER_TEMP/viepn-xcodebuild.log"
+
+      - name: Package Payload into unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/ViePNDerivedData/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/viepn-payload/Payload" dist
+          cp -R "$APP" "$RUNNER_TEMP/viepn-payload/Payload/"
+          (cd "$RUNNER_TEMP/viepn-payload" && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ViePN-WidgetPlus-unsigned.ipa" Payload)
+          unzip -t dist/ViePN-WidgetPlus-unsigned.ipa | tail -1
+          unzip -l dist/ViePN-WidgetPlus-unsigned.ipa | grep 'Payload/ViePNWidgetPlus.app/Info.plist'
+          shasum -a 256 dist/ViePN-WidgetPlus-unsigned.ipa > dist/SHA256SUMS.txt
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViePN-WidgetPlus-unsigned-IPA
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Xcode build log if failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViePN-xcodebuild-diagnostics
+          path: ${{ runner.temp }}/viepn-xcodebuild.log
+          if-no-files-found: ignore
+          retention-days: 7
