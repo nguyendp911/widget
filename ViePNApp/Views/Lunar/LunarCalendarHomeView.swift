@@ -37,6 +37,18 @@ struct LunarCalendarHomeView: View {
             VStack(alignment: .leading, spacing: 20) {
                 hero
                 heritageShortcuts
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionLabel("CAN CHI & TỬ VI", subtitle: "Thông tin lịch vạn niên hôm nay")
+                    LunarCardView(
+                        kind: .almanac, size: .large, civil: today,
+                        appearance: family.appearance, upcomingEvents: upcoming
+                    )
+                    .frame(height: 330)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    Text("Tử vi dân gian: con giáp và tuổi xung theo ngày, không phải lá số tử vi cá nhân.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(muted)
+                }
                 widgetShowcase
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("TRA CỨU LỊCH", subtitle: "Từng ngày, từng tháng âm dương")

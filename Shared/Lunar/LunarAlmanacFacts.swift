@@ -36,6 +36,19 @@ struct LunarAlmanacFacts {
         }
     }
 
+    /// The Vietnamese zodiac includes Mèo (cat) for Mão, not rabbit.
+    static func animal(_ branch: String) -> String {
+        let map = [
+            "Tý": "Chuột", "Sửu": "Trâu", "Dần": "Hổ", "Mão": "Mèo",
+            "Thìn": "Rồng", "Tỵ": "Rắn", "Ngọ": "Ngựa", "Mùi": "Dê",
+            "Thân": "Khỉ", "Dậu": "Gà", "Tuất": "Chó", "Hợi": "Lợn"
+        ]
+        return map[branch] ?? branch
+    }
+
+    var dayAnimalName: String { Self.animal(dayAnimal) }
+    var yearAnimalName: String { Self.animal(yearAnimal) }
+    var opposingAnimalName: String { Self.animal(opposingZodiac) }
     var dayKind: String { auspicious ? "Hoàng đạo" : "Hắc đạo" }
     var goodHoursLabel: String { goodHours.joined(separator: " · ") }
     var culturalLabel: String {

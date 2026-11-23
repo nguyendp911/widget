@@ -100,29 +100,17 @@ struct LunarCardView: View {
     }
 
     private var heading: some View {
-        Group {
-            if size != .small && theme != .zen {
-                LunarHeritageSectionTitle(title: kind == .almanac ? "LỊCH VẠN NIÊN" : "LỊCH ÂM TĨNH", theme: theme)
-                    .frame(height: 28)
-            } else {
-                HStack(spacing: 6) {
-                    if theme != .zen {
-                        Image(LunarHeritageComponents.imageOrFallback("HeritageActionCalendar"))
-                            .resizable().scaledToFit().frame(width: 18, height: 18)
-                    } else {
-                        Image(systemName: "moon.phase.waning.crescent")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(accent)
-                    }
-                    Text("LỊCH ÂM TĨNH")
-                        .font(.system(size: 9, weight: .semibold, design: .rounded))
-                        .tracking(1.5).foregroundStyle(muted)
-                    Spacer(minLength: 0)
-                    if isSpecial {
-                        Circle().fill(accent).frame(width: 5, height: 5)
-                            .accessibilityLabel("Ngày âm lịch đặc biệt")
-                    }
-                }
+        HStack(spacing: 6) {
+            LunarVectorHeader(
+                title: kind == .almanac ? "LỊCH VẠN NIÊN · CAN CHI" : "LỊCH ÂM TĨNH",
+                theme: theme,
+                compact: size == .small || size == .medium
+            )
+            if isSpecial && size == .small {
+                Circle()
+                    .fill(accent)
+                    .frame(width: 5, height: 5)
+                    .accessibilityLabel("Ngày đặc biệt")
             }
         }
     }
@@ -189,7 +177,7 @@ struct LunarCardView: View {
         return VStack(alignment: .leading, spacing: 8) {
             if size != .small { Text("NHỊP TRĂNG VIỆT").font(.system(size: 10, weight: .medium)).tracking(1.4).foregroundStyle(muted) }
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: "moon.circle").foregroundStyle(accent)
+                LunarVectorIcon(glyph: .moon, theme: theme, size: 20)
                 Text("Rằm").font(.system(size: size == .small ? 19 : 25, weight: .medium, design: .serif))
                 Spacer()
                 Text(full.map { "\($0.daysUntil) ngày" } ?? "—")
@@ -197,7 +185,7 @@ struct LunarCardView: View {
             }
             separator
             HStack(spacing: 8) {
-                Image(systemName: "moon.phase.new").foregroundStyle(accent)
+                LunarVectorIcon(glyph: .moon, theme: theme, size: 18)
                 Text("Mùng 1").font(.system(size: 13, weight: .medium))
                 Spacer()
                 Text(first.map { "\($0.daysUntil) ngày" } ?? "—")
@@ -224,7 +212,7 @@ struct LunarCardView: View {
                 Text("Giỗ \(event.lunar.day)/\(event.lunar.month) âm · \(event.solar.label)")
                     .font(.system(size: 10)).foregroundStyle(muted).lineLimit(2)
             } else {
-                Image(systemName: "heart.text.square").font(.title2).foregroundStyle(accent)
+                LunarVectorIcon(glyph: .family, theme: theme, size: 28)
                 Text("Giữ những ngày thương nhớ.")
                     .font(.system(size: 18, weight: .medium, design: .serif)).lineLimit(2)
                 Text("Thêm ngày giỗ trong ứng dụng").font(.system(size: 11)).foregroundStyle(muted)
@@ -332,108 +320,99 @@ struct LunarCardView: View {
     private var almanacBody: some View {
         let facts = LunarAlmanacFacts(civil)
         if size == .large {
-            VStack(alignment: .leading, spacing: 9) {
-                HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .center, spacing: 11) {
                     Text("\(civil.day)")
-                        .font(.system(size: 51, weight: .light, design: .serif))
+                        .font(.system(size: 46, weight: .light, design: .serif))
                         .monospacedDigit()
                         .foregroundStyle(ink)
+                        .frame(minWidth: 51, alignment: .leading)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("THÁNG \(civil.month) · \(civil.year)")
+                        Text("DƯƠNG \(civil.month)/\(civil.year) · ÂM \(lunar?.day ?? 0)/\(lunar?.month ?? 0)\(lunar?.isLeapMonth == true ? " NHUẬN" : "")")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(muted)
-                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)\(lunar?.isLeapMonth == true ? " nhuận" : "")")
-                            .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(accent)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                         Text("Ngày \(facts.canChiDay)")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 13, weight: .semibold, design: .serif))
                             .foregroundStyle(ink)
+                        Text("Năm \(facts.canChiYear) · Con \(facts.yearAnimalName)")
+                            .font(.system(size: 10))
+                            .foregroundStyle(muted)
                     }
                     Spacer(minLength: 0)
                 }
-                separator
-                HStack(alignment: .top, spacing: 10) {
-                    almanacFact("CAN CHI", "Tháng \(facts.canChiMonth)\nNăm \(facts.canChiYear)")
-                    almanacFact("SAO · TRỰC", "\(facts.spirit)\nTrực \(facts.officer)")
+                Rectangle().fill(accent.opacity(0.25)).frame(height: 1)
+
+                HStack(alignment: .top, spacing: 9) {
+                    LunarVectorFact(
+                        glyph: .canChi, title: "CAN CHI THÁNG / NĂM",
+                        value: "\(facts.canChiMonth) / \(facts.canChiYear)", theme: theme)
+                    LunarVectorFact(
+                        glyph: .spirit, title: "SAO · TRỰC",
+                        value: "\(facts.spirit) · \(facts.officer)", theme: theme)
                 }
-                HStack(alignment: .top, spacing: 10) {
-                    almanacFact("TIẾT KHÍ", facts.solarTerm)
-                    almanacFact("NGÀY", facts.dayKind)
+                HStack(alignment: .top, spacing: 9) {
+                    LunarVectorFact(
+                        glyph: .solarTerm, title: "TIẾT KHÍ",
+                        value: facts.solarTerm, theme: theme)
+                    LunarVectorFact(
+                        glyph: .calendar, title: "NGÀY TỐT – XẤU",
+                        value: facts.dayKind, theme: theme)
                 }
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("GIỜ HOÀNG ĐẠO")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(muted)
-                    Text(facts.goodHoursLabel)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(ink)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                LunarVectorInline(
+                    glyph: .goodHours,
+                    value: "Giờ hoàng đạo: " + facts.goodHoursLabel, theme: theme
+                )
+                LunarVectorInline(
+                    glyph: .zodiac,
+                    value: "Tử vi dân gian: ngày \(facts.dayAnimalName) · tuổi xung \(facts.opposingAnimalName)",
+                    theme: theme
+                )
                 if appearance.showFamilyEvents, let event = nextFamily {
-                    HStack(spacing: 5) {
-                        Image(systemName: "heart")
-                        Text("Sắp tới: \(event.title)")
-                            .lineLimit(1)
-                        Spacer(minLength: 3)
-                        Text("\(event.daysRemaining(from: civil)) ngày")
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(accent)
+                    LunarVectorInline(
+                        glyph: .family,
+                        value: "\(event.title) · còn \(event.daysRemaining(from: civil)) ngày",
+                        theme: theme
+                    )
                 }
-                Text("Tử vi dân gian (tham khảo) · Tuổi xung: \(facts.opposingZodiac)")
-                    .font(.system(size: 10))
-                    .foregroundStyle(muted)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         } else {
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(alignment: .firstTextBaseline, spacing: 9) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .center, spacing: 8) {
                     Text("\(civil.day)")
                         .font(.system(size: 32, weight: .light, design: .serif))
                         .foregroundStyle(ink)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)")
-                            .font(.system(size: 13, weight: .semibold))
+                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0) · \(facts.canChiDay)")
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(accent)
-                        Text(facts.canChiDay)
-                            .font(.system(size: 11, weight: .medium))
+                            .lineLimit(1)
+                        Text("Tháng \(facts.canChiMonth) · Năm \(facts.canChiYear)")
+                            .font(.system(size: 10))
+                            .foregroundStyle(ink)
+                            .lineLimit(1)
                     }
                     Spacer(minLength: 0)
                 }
-                separator
-                HStack(spacing: 8) {
-                    Text(facts.dayKind + " · Trực " + facts.officer)
-                    Spacer(minLength: 0)
-                    Text(facts.solarTerm)
-                }
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(ink)
-                .lineLimit(1)
-                Text("Giờ tốt: " + facts.goodHoursLabel)
-                    .font(.system(size: 10))
-                    .foregroundStyle(muted)
-                    .lineLimit(1)
-                Text("Tuổi xung ngày: " + facts.opposingZodiac + " · Phong tục tham khảo")
-                    .font(.system(size: 9))
-                    .foregroundStyle(muted)
-                    .lineLimit(1)
+                LunarVectorInline(
+                    glyph: .spirit,
+                    value: facts.dayKind + " · " + facts.spirit + " · Trực " + facts.officer,
+                    theme: theme
+                )
+                LunarVectorInline(
+                    glyph: .solarTerm,
+                    value: facts.solarTerm + " · Giờ tốt: " + facts.goodHoursLabel,
+                    theme: theme
+                )
+                LunarVectorInline(
+                    glyph: .zodiac,
+                    value: "Tuổi ngày: " + facts.dayAnimalName + " · Xung: " + facts.opposingAnimalName,
+                    theme: theme
+                )
             }
         }
-    }
-
-    private func almanacFact(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(label)
-                .font(.system(size: 9, weight: .semibold))
-                .tracking(0.3)
-                .foregroundStyle(muted)
-            Text(value)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ink)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var lockContent: some View {

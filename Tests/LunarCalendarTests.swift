@@ -31,6 +31,16 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertNil(LunarArtwork.none.resolvedResource(theme: .heritage, family: "Large"))
     }
 
+    func testZodiacVietnameseAnimalLabels() {
+        XCTAssertEqual(LunarAlmanacFacts.animal("Mão"), "Mèo")
+        XCTAssertEqual(LunarAlmanacFacts.animal("Sửu"), "Trâu")
+        XCTAssertEqual(LunarAlmanacFacts.animal("Thìn"), "Rồng")
+        let facts = LunarAlmanacFacts(SolarCivilDate(year: 2026, month: 11, day: 23))
+        XCTAssertFalse(facts.dayAnimalName.isEmpty)
+        XCTAssertFalse(facts.opposingAnimalName.isEmpty)
+        XCTAssertEqual(facts.goodHours.count, 6)
+    }
+
     func testTetAndLeapMonths() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(VietnameseLunarCalendar.solarToLunar(tet),
