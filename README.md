@@ -108,7 +108,7 @@ the App Store and uses no Apple Developer certificates or private keys.
 
 ## Life OS: widgets hữu ích (2026-11)
 
-Ngoài Living Canvas, phiên bản này có **6 widget độc lập + 1 Life Command tổng hợp** trong Widget Gallery của iOS:
+Ngoài Living Canvas, phiên bản này có **5 widget độc lập** trong Widget Gallery của iOS:
 
 | Widget | Chức năng trực tiếp | Dữ liệu |
 | --- | --- | --- |
@@ -117,7 +117,6 @@ Ngoài Living Canvas, phiên bản này có **6 widget độc lập + 1 Life Com
 | Hóa đơn | Xem ngày đến hạn, đánh dấu đã thanh toán | Hóa đơn lặp theo tháng (ngày 1–28) |
 | Ghi chú nhanh | Xem ghi chú gần nhất, chạm mở ViePN | Ghi chú cục bộ, có tùy chọn che nội dung |
 | Deep Focus | Bắt đầu/dừng phiên 25 phút, đếm ngược | Phiên tập trung cục bộ |
-| Life Command | Một widget chứa ngân sách, việc, hạn hóa đơn và phiên tập trung | Tổng hợp dữ liệu đã nhập |
 
 Trong ứng dụng, mở tab **Tiện ích (Life OS)** để nhập dữ liệu, quản lý ngân sách và tạo các mục. Widget Extension truy cập bản sao dữ liệu cục bộ bằng **App Groups**. Không có kết nối ngân hàng, không truy cập SMS, không đọc tin nhắn hay thực hiện thanh toán. Việc cập nhật widget phụ thuộc cơ chế điều phối của iOS; bộ đếm giờ dùng hiển thị thời gian của hệ thống.
 
@@ -133,3 +132,21 @@ Trong ứng dụng, mở tab **Tiện ích (Life OS)** để nhập dữ liệu,
 - Windows: chạy `python scripts/validate_source.py` và chỉnh sửa code trong VS Code/Codex.
 - macOS/Xcode: `brew install xcodegen`, `xcodegen generate`, chạy scheme `ViePNWidgetPlus`.
 - GitHub Actions: workflow `ios-unsigned-ipa.yml` compile Simulator và thiết bị, sau đó đóng gói IPA chưa ký. Unsigned IPA không cài được bằng cách thông thường nếu chưa ký lại cả app và widget extension.
+
+## Lịch Âm Tĩnh — v2.2
+
+A Vietnamese family lunar calendar module using fixed **Vietnam UTC+7** dates and the Hồ Ngọc Đức / Jean Meeus astronomical approximation (1900–2100). It is not a China UTC+8 calendar.
+
+- 6 WidgetKit families: today, next family event, new/full moon countdown, memorial, lunar-solar month, traditional details; Home/Lock Screen supported where appropriate.
+- Minimal Zen (default), Vietnamese Heritage, Luxury Dark, Tết and Mid-Autumn visual themes. Existing stored themes remain decodable.
+- Local recurring lunar memorials with explicit leap-month and missing-day-30 rules, notifications and 10-year `.ics` calendar export.
+- Day / week / month / year views, Can Chi, 24 solar terms (approximate transition-day calculations), traditional day information and festival notes.
+- iOS widget timeline refresh is controlled by WidgetKit. App reminders are reprojected when the app is opened or events change; for multi-year reliability, export the generated ICS and add it to a calendar.
+
+Quick test on Windows with Swift installed or on GitHub macOS runner:
+
+```bash
+bash scripts/run_lunar_smoke.sh
+```
+
+**Accuracy caveat:** Astronomical approximations can differ near midnight new-moons; before marketing the calculator as an authoritative almanac, reconcile against a published Vietnamese reference calendar and add regression fixtures for rare edge dates (notably years 2072 / 2085). Geomancy, lucky hours and good/bad days are presented strictly as traditional culture and may vary by school.

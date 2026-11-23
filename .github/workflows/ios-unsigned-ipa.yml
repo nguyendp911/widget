@@ -30,6 +30,9 @@ jobs:
       - name: Test pure utility data logic
         run: bash scripts/run_utility_smoke.sh
 
+      - name: Test Vietnamese lunar conversion and recurring family events
+        run: bash scripts/run_lunar_smoke.sh
+
       - name: Generate Xcode project
         run: xcodegen generate
 
