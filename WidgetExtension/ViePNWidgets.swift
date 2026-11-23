@@ -71,10 +71,11 @@ struct StudioProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: SelectDesignIntent, in context: Context) async -> Timeline<StudioEntry> {
         let now = Date()
-        let start = Calendar.current.dateInterval(of: .minute, for: now)?.start ?? now
-        // 60 pre-generated minute entries; the system decides when to actually render.
-        let entries = (0..<61).compactMap { offset -> StudioEntry? in
-            guard let next = Calendar.current.date(byAdding: .minute, value: offset, to: start) else {
+        // Hourly entries let the Command Center switch between morning, focus and
+        // evening states. WidgetKit may delay rendering according to its budget.
+        let start = Calendar.current.dateInterval(of: .hour, for: now)?.start ?? now
+        let entries = (0..<26).compactMap { offset -> StudioEntry? in
+            guard let next = Calendar.current.date(byAdding: .hour, value: offset, to: start) else {
                 return nil
             }
             return makeEntry(date: next, selectedID: configuration.design?.id)

@@ -3,20 +3,18 @@ import SwiftUI
 struct SettingsView: View {
     var body: some View {
         List {
-            Section("Thông tin") {
-                LabeledContent("Ứng dụng", value: "ViePN Widget+")
-                LabeledContent("Phiên bản", value: "0.1.0 Starter")
-                LabeledContent("iOS tối thiểu", value: "17.0")
+            Section("ViePN Widget+") {
+                LabeledContent("Edition", value: "Living Canvas 2.0")
+                LabeledContent("Minimum iOS", value: "17.0")
+                LabeledContent("Privacy", value: "Local-first, App Groups")
             }
-            Section("Thêm widget lên iPhone") {
-                Text("1. Lưu một thiết kế trong Widget Studio.")
-                Text("2. Nhấn giữ vùng trống trên Home Screen, chọn Thêm Widget.")
-                Text("3. Tìm ViePN Widget+, chọn kích thước và thêm.")
-                Text("4. Nhấn giữ widget, chọn Sửa Widget, rồi chọn thiết kế đã lưu.")
+            Section("How to use") {
+                Text("Create a widget in Canvas, save it, then open the Home Screen widget gallery.")
+                Text("Long-press your installed widget, choose Edit Widget, and select your saved design.")
+                Text("Use Theme Fusion to share a wallpaper image or export the current scene as JSON.")
             }
-            Section("Dữ liệu") {
-                Text("Bản starter lưu dữ liệu cục bộ qua App Groups; chưa gửi dữ liệu tới máy chủ.")
-                    .foregroundStyle(.secondary)
+            Section("Platform limitations") {
+                Text("Widgets update on the system timeline. Continuous animation and installing wallpaper or app icons programmatically are not supported.")
             }
         }
         .navigationTitle("Settings")

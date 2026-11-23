@@ -16,7 +16,7 @@ final class WidgetDesignTests: XCTestCase {
         XCTAssertEqual(template.name, duplicated.name)
     }
 
-    func testCatalogCoversSixKinds() {
+    func testCatalogCoversEightKinds() {
         XCTAssertEqual(Set(SampleTemplates.catalog.map(\.kind)), Set(WidgetKind.allCases))
     }
 }

@@ -1,106 +1,72 @@
-# ViePN Widget+ — iOS 17+ SwiftUI Starter
+# ViePN Widget+ 2.0 — Living Canvas
 
-A real source-code starter for **ViePN Widget+** with an iOS app, WidgetKit extension,
-App Intents, shared storage, theme gallery and editable widget designs.
+**SwiftUI + WidgetKit + App Intents · iOS 17+ · Windows/Codex development · macOS/Xcode build**
 
-> Status: **Starter / not yet compiled on Xcode**. All Swift files are source files,
-> not an already-built `.ipa`. macOS + Xcode is required for the first actual iOS build.
+> A local-first personalisation studio, not a remote wallpaper service. Source included, independent of external APIs. This repository can build an **unsigned device IPA** using GitHub Actions. The IPA must be properly signed before installation.
 
-## Included
+## What's new in 2.0
 
-- SwiftUI app with five tabs: Home, Explore, Studio, My Widgets, Settings.
-- Template gallery: 12 templates across six categories.
-- Editor: title, message, font, color, border, photo selection and countdown date.
-- Widget Extension: configurable per-instance design, small / medium / large.
-- Interactive habit button via App Intent.
-- App Groups + shared UserDefaults, image files in the shared container.
-- Privacy manifests and a GitHub Actions workflow that builds an unsigned iPhone-device IPA.
-- `docs/TECHNICAL_SPEC.md` and `docs/ROADMAP.md`.
+- **Premium Home / Gallery** — dedicated dark editorial UI and curated 12 designs covering eight widget types.
+- **6 Living Scenes** — Aurora Drift, Cosmic Dust, Zen Horizon, Neon City, Dreamscape, Noir Glass. All scenes are deterministic vector graphics; Aurora/Zen respond to time of day.
+- **Magic Canvas** — overlay-based direct manipulation of layers; editable text, clock, date, SF Symbols, photo and geometric elements; drag to position, scale, rotation, opacity, colour, hide/remove, front/back ordering, undo/redo (up to 35 edits).
+- **Contextual smart widgets** — Daily Command content changes by morning/afternoon/evening and shows user-defined priorities; Memory Timeline counts dates and can display a selected picture.
+- **Theme Fusion** — coordinated widget palettes + wallpaper PNG (1170×2532), icon sheet PNG, theme JSON export and JSON import. Theme packs can be shared through iOS Share Sheet.
+- **Safe v0.1 upgrade** — saved designs decode with defaults for newly added fields. The shared App Groups storage key is unchanged.
+- **Widget extension** — choose a stored design from the widget editing menu; interactive habit button; hourly timeline entries.
 
-## On Windows
+## Project map
+
+```text
+ViePNApp/Views/              Premium screens, Magic Canvas and Theme Fusion
+ViePNApp/Stores/             Local design management
+Shared/Models/               Backwards-compatible design/layer/scene models
+Shared/Views/                One renderer used by the app and the Widget Extension
+WidgetExtension/             WidgetKit + App Intents
+Tests/                       Model migration and layer unit tests
+scripts/                     Validation and unsigned IPA build
+.github/workflows/           macOS CI and IPA artifacts
+project.yml                  XcodeGen input
+```
+
+## Develop on Windows
 
 ```powershell
-cd ViePN-WidgetPlus-Starter
-python scripts/validate_source.py
-# optionally: pip install pyyaml to enable YAML verification
+git clone https://github.com/nguyendp911/widget.git
+cd widget
+python .\scripts\validate_source.py
 code .
 ```
 
-### Publish to GitHub
+Visual Studio Code and Codex can edit source on Windows. **They cannot build/test against Apple's iOS SDK there.** Check a pull request by running the GitHub Actions workflow on macOS.
 
-```powershell
-git init
-git add .
-git commit -m "feat: ViePN Widget+ iOS starter"
-git branch -M main
-git remote add origin https://github.com/YOUR-ACCOUNT/ViePN-WidgetPlus.git
-git push -u origin main
-```
+## Build in GitHub Actions
 
-Create the **empty repository** first and replace `YOUR-ACCOUNT` above.
-The included GitHub Action will attempt to build an unsigned iphoneos IPA on a macOS runner;
-check its logs to discover compiler issues.
+Open **Actions → ViePN Widget+ - Unsigned IPA → Run workflow**. The runner installs XcodeGen and builds a device target with `CODE_SIGNING_ALLOWED=NO`, then packages `Payload/ViePNWidgetPlus.app` as `ViePN-WidgetPlus-unsigned.ipa`. Download the workflow's artifact. It is not a signed, ready-to-install application.
 
-## On macOS
-
-Install Xcode from Apple, launch it once and accept its license. Install XcodeGen:
+## Build on Mac
 
 ```bash
 brew install xcodegen
-xcodegen generate
-open ViePNWidgetPlus.xcodeproj
-```
-
-Select **ViePNWidgetPlus** scheme, configure Signing & Capabilities on *both*
-app and widget targets, and enable the **same App Groups identifier**:
-`group.com.viepn.widgetplus`. Set your own unique Bundle IDs and group in
-`project.yml`, `Shared/Storage/SharedRepository.swift`, and generated entitlements.
-Re-run `xcodegen generate` after changing the project spec.
-
-Unsigned device IPA from Terminal (macOS):
-
-```bash
 bash scripts/build_unsigned_ipa_macos.sh
 ```
 
-Unsigned Simulator build from Terminal:
+## Setup before signed distribution
 
-```bash
-xcodebuild -project ViePNWidgetPlus.xcodeproj \
-  -scheme ViePNWidgetPlus -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  CODE_SIGNING_ALLOWED=NO build
-```
+1. Register the bundle IDs `com.viepn.widgetplus` and `com.viepn.widgetplus.widgets` in Apple Developer.
+2. Register App Group `group.com.viepn.widgetplus` and enable it for both targets.
+3. Configure app and extension signing/provisioning profiles and build normally with Xcode.
+4. Test on iPhone: photos, widget editing, App Intents, all three widget families, Smart and Memory.
+5. Review App Store requirements, artwork/privacy manifests, accessibility and translations.
 
-For a physical iPhone or App Store, use a valid Apple Developer team/signing profile.
+## Platform and implementation caveats
 
-## Using the app
+- WidgetKit is snapshot/timeline based, **not an always-running animated surface**. `LivingSceneView` renders a frame for a given time. WidgetKit decides actual refresh timing.
+- iOS does not permit direct installation of wallpaper, custom app icons or complete Home Screen layout by third-party apps. Theme Fusion exports the assets and leaves application of them to the user.
+- SF Symbols in the icon sheet are illustrative previews and the sheet is not a directly installable iOS icon pack. Use Shortcuts or compatible launcher flows where appropriate.
+- Smart Daily Command uses user-configured priorities and the device clock, **not AI predictions or automatically imported Apple Calendar events**.
+- Theme JSON import accepts v2 packages and caps templates at 150. Shared file origins must be trusted; image files are not embedded in JSON.
+- Premium account sync, server-backed AI designer, advanced timeline planning, lock-screen accessories and full icon-package automation are not included and would require additional design/permissions.
 
-1. Open **Explore** and tap a template (or create from **Studio**).
-2. Edit and **save** the widget.
-3. On iPhone Home Screen, long-press and use **Add Widget**.
-4. Find **ViePN Widget+**, add a size, long-press it and select **Edit Widget**.
-5. Choose your saved design. Each installed instance can pick its own design.
+## Status
 
-## Architecture warning
-
-The project includes functional source paths, but no claim is made that it has been
-compiled in Xcode in this Windows/Linux environment. WeatherKit, lunar calendar,
-AI generation, StoreKit subscriptions, iCloud and Lock Screen widgets are **future
-milestones**, not functioning features of this starter. Photo data is stored in
-App Group local storage; current code does not clean orphaned photo files.
-
-The real iOS experience may require minor API and signing adjustments against your
-selected Xcode / iOS SDK. See `docs/TECHNICAL_SPEC.md` for requirements and QA.
-
-## GitHub Actions unsigned IPA
-
-The workflow `.github/workflows/ios-unsigned-ipa.yml` builds for `iphoneos`, disables
-Xcode code signing, bundles the `.app` and widget `.appex` under `Payload/`, and uploads
-`ViePN-WidgetPlus-unsigned.ipa` as an Actions artifact. Go to **Actions → ViePN
-Widget+ - Unsigned IPA → latest successful run → Artifacts** to download it.
-
-**An unsigned IPA is NOT directly installable on a standard iPhone.** You must sign
-it with an appropriate development or distribution identity and compatible
-provisioning entitlements before installation. This workflow does not publish to
-the App Store and uses no Apple Developer certificates or private keys.
+The code is source-complete for the documented v2 scope, but this README does not claim passing an Xcode build unless confirmed by the GitHub Actions run. Linux `swiftc -frontend -parse` and model type-check can be used for preliminary checks only.

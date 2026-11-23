@@ -18,32 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # First upload includes a compressed source archive because the linked
-      # GitHub connector uploads text and Git blobs separately. On the first
-      # run, unpack and commit the actual editable files into main.
-      - name: Restore source on first push
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -f .viepn-source.tar.xz ]]; then
-            python3 - <<'PY'
-          from pathlib import Path
-          import tarfile
-          with tarfile.open('.viepn-source.tar.xz', 'r:xz') as archive:
-              for item in archive.getmembers():
-                  p = Path(item.name)
-                  if p.is_absolute() or '..' in p.parts:
-                      raise ValueError(f'Unsafe archive path: {item.name}')
-              archive.extractall('.')
-          PY
-            rm .viepn-source.tar.xz
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add -A
-            git commit -m 'feat: unpack ViePN Widget+ SwiftUI sources'
-            git push origin HEAD:main
-          fi
-
       - name: Show Xcode version
         run: xcodebuild -version
 
@@ -55,6 +29,20 @@ jobs:
 
       - name: Generate Xcode project
         run: xcodegen generate
+
+      - name: Build tests for iOS Simulator
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ViePNWidgetPlus.xcodeproj \
+            -scheme ViePNWidgetPlus \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/ViePNTestsDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            build-for-testing 2>&1 | tee "$RUNNER_TEMP/viepn-tests-build.log"
 
       - name: Build unsigned device app
         shell: bash
@@ -92,6 +80,15 @@ jobs:
           path: dist/*
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload test-build log if failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ViePN-tests-build-diagnostics
+          path: ${{ runner.temp }}/viepn-tests-build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Xcode build log if failed
         if: failure()

@@ -8,7 +8,7 @@ struct ViePNWidgetPlusApp: App {
         WindowGroup {
             RootTabView()
                 .environmentObject(studio)
-                .tint(Color(hex: "#6777E8"))
+                .tint(Color(hex: "#5DE9D8"))
         }
     }
 }

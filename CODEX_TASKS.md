@@ -1,22 +1,14 @@
-# Codex instruction & first tickets
+# Codex project instructions (ViePN Widget+ Living Canvas 2.0)
 
-Repository source of truth: `project.yml`, `Shared/`, `ViePNApp/`, `WidgetExtension/`, `docs/`.
+Goal: maintain and extend the existing SwiftUI / WidgetKit project. Keep it local-first. Never assume iPhone apps compile on Windows; check on macOS Actions after changes.
 
-## First Codex request
-
-> Inspect this SwiftUI + WidgetKit source. Do not rewrite it into Flutter/React Native.
-> Keep minimum iOS 17. First, improve compile reliability against current Xcode SDK.
-> Check AppIntents, WidgetKit, XcodeGen targets, code signing, SharedRepository and
-> WidgetDesignView. Make the smallest fixes needed. Add tests. Do not claim an iOS
-> build passed unless a macOS Xcode runner actually built it. Maintain the Vietnamese UI.
-
-## Tickets
-
-1. P0 Generate Xcode project on macOS and fix any build errors.
-2. P0 Set up shared App Group capability for real device (both targets).
-3. P1 Refactor image file naming / compression / cleanup / corruption handling.
-4. P1 Improve widget preview layouts in small/medium/large.
-5. P1 Add real onboarding: add widget → edit widget → choose saved design.
-6. P1 Extend tests / snapshots and release checklist.
-7. P2 Layer-based Studio editor with undo/redo and template import/export.
-8. P2 WeatherKit, EventKit, Lock Screen after MVP verified.
+1. `python scripts/validate_source.py` and optional `swiftc -frontend -parse` for syntax.
+2. Preserve `WidgetDesign` Codable backwards compatibility: V1 designs in `viepn.designs.v1` must survive updates.
+3. Keep `WidgetDesignView` as the single widget renderer for both app and widget extension.
+4. Prefer extracted small views to prevent SwiftUI type-check explosions.
+5. Never implement fake smooth animations in WidgetKit. Living scenes are snapshot-based.
+6. Widget actions use App Intents and update App Groups; don't call unavailable extension APIs.
+7. Test under GitHub Actions, inspect logs, repair build failures before reporting success.
+8. Keep unsigned IPA (`CODE_SIGNING_ALLOWED=NO`) separate from distributable signed releases.
+9. Verify all export/import paths, including security-scoped URLs. Avoid bundled remote assets.
+10. Update `docs/TECHNICAL_SPEC.md` and this checklist for material changes.

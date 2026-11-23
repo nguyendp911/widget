@@ -4,28 +4,77 @@ struct DashboardView: View {
     @EnvironmentObject private var studio: WidgetStudioStore
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Thiết kế iPhone của bạn")
-                        .font(.largeTitle.bold())
-                    Text("Chọn, chỉnh sửa và lưu widget theo phong cách riêng.")
-                        .foregroundStyle(.secondary)
+        StudioPage {
+            VStack(alignment: .leading, spacing: 23) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("VIEPN / CREATIVE OS")
+                            .font(.system(size: 10, weight: .bold)).tracking(2.5)
+                            .foregroundStyle(StudioPalette.mint)
+                        Text("Living Canvas.")
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text("Make your screen feel alive.")
+                            .font(.subheadline).foregroundStyle(StudioPalette.muted)
+                    }
+                    Spacer()
+                    Image(systemName: "sparkles.rectangle.stack.fill")
+                        .font(.title2).foregroundStyle(StudioPalette.mint)
+                        .frame(width: 49, height: 49)
+                        .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 16))
                 }
+                NavigationLink {
+                    WidgetEditorView(design: SampleTemplates.catalog[1].duplicate())
+                } label: {
+                    ZStack(alignment: .bottomLeading) {
+                        LivingSceneView(scene: .cosmos, date: .now)
+                        HStack {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("THE SIGNATURE COLLECTION")
+                                    .font(.system(size: 10, weight: .black)).tracking(2)
+                                    .foregroundStyle(StudioPalette.mint)
+                                Text("Create your\nown universe.")
+                                    .font(.system(size: 31, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                    .multilineTextAlignment(.leading)
+                                Label("Open Magic Canvas", systemImage: "arrow.up.right")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 14).padding(.vertical, 10)
+                                    .background(.white.opacity(0.19), in: Capsule())
+                            }
+                            Spacer()
+                        }
+                        .padding(23)
+                    }
+                    .frame(height: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: 27))
+                }
+                .buttonStyle(.plain)
 
-                Text("MẪU NỔI BẬT")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-
+                HStack {
+                    Text("EXPLORE WORLDS")
+                        .font(.system(size: 12, weight: .black)).tracking(2)
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Text("6 SCENES").font(.caption.bold())
+                        .foregroundStyle(StudioPalette.muted)
+                }
                 ScrollView(.horizontal) {
                     HStack(spacing: 12) {
-                        ForEach(Array(SampleTemplates.catalog.prefix(5))) { template in
+                        ForEach(LivingScene.allCases) { scene in
                             NavigationLink {
-                                WidgetEditorView(design: template.duplicate())
+                                WidgetEditorView(design: WidgetDesign.fresh(.clock, scene: scene))
                             } label: {
-                                WidgetDesignView(design: template, date: Date(), habitCompleted: false)
-                                    .frame(width: 180, height: 172)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                                ZStack(alignment: .bottomLeading) {
+                                    LivingSceneView(scene: scene, date: .now)
+                                    Text(scene.name)
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(13)
+                                }
+                                .frame(width: 147, height: 153)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
                             }
                             .buttonStyle(.plain)
                         }
@@ -33,25 +82,36 @@ struct DashboardView: View {
                 }
                 .scrollIndicators(.hidden)
 
-                Text("Thiết kế đã lưu: \(studio.designs.count)")
-                    .font(.headline)
-                if studio.designs.isEmpty {
-                    ContentUnavailableView("Chưa có widget", systemImage: "square.stack.3d.up", description: Text("Mở Explore hoặc Studio để tạo widget đầu tiên."))
-                } else {
-                    ForEach(Array(studio.designs.prefix(3))) { design in
-                        NavigationLink {
-                            WidgetEditorView(design: design)
-                        } label: {
-                            Label(design.name, systemImage: design.kind.symbol)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(12)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                StudioPanel {
+                    HStack(spacing: 15) {
+                        Image(systemName: "square.stack.3d.up.fill")
+                            .font(.title2).foregroundStyle(StudioPalette.mint)
+                            .frame(width: 54, height: 54)
+                            .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 15))
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("\(studio.designs.count) saved creations")
+                                .font(.headline).foregroundStyle(.white)
+                            Text("Thế giới sáng tạo của riêng bạn")
+                                .font(.caption).foregroundStyle(StudioPalette.muted)
                         }
+                        Spacer()
                     }
                 }
+                HStack {
+                    Text("CURATED FOR YOU")
+                        .font(.system(size: 12, weight: .black)).tracking(2).foregroundStyle(.white)
+                    Spacer()
+                }
+                ForEach(Array(SampleTemplates.catalog.prefix(3))) { design in
+                    NavigationLink {
+                        WidgetEditorView(design: design.duplicate())
+                    } label: {
+                        SceneShowcaseCard(design: design, height: 205)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .padding()
         }
-        .navigationTitle("ViePN Widget+")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

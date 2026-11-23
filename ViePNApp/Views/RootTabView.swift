@@ -4,15 +4,18 @@ struct RootTabView: View {
     var body: some View {
         TabView {
             NavigationStack { DashboardView() }
-                .tabItem { Label("Home", systemImage: "house") }
+                .tabItem { Label("Today", systemImage: "house.fill") }
             NavigationStack { GalleryView() }
-                .tabItem { Label("Explore", systemImage: "square.grid.2x2") }
+                .tabItem { Label("Discover", systemImage: "square.grid.2x2.fill") }
             NavigationStack { StudioHomeView() }
-                .tabItem { Label("Studio", systemImage: "paintbrush.pointed") }
+                .tabItem { Label("Canvas", systemImage: "square.3.layers.3d") }
+            NavigationStack { ThemeFusionView() }
+                .tabItem { Label("Themes", systemImage: "paintpalette.fill") }
             NavigationStack { MyWidgetsView() }
-                .tabItem { Label("My Widgets", systemImage: "square.stack") }
-            NavigationStack { SettingsView() }
-                .tabItem { Label("Settings", systemImage: "gearshape") }
+                .tabItem { Label("Library", systemImage: "square.stack.fill") }
         }
+        .tint(StudioPalette.mint)
+        .toolbarColorScheme(.dark, for: .tabBar)
+        .preferredColorScheme(.dark)
     }
 }
