@@ -13,7 +13,7 @@ struct ViePNWidgetPlusApp: App {
                 .environmentObject(studio)
                 .environmentObject(utilities)
                 .environmentObject(lunarFamily)
-                .tint(Color(hex: "#5DE9D8"))
+                .tint(StudioPalette.mint)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         lunarFamily.reload()

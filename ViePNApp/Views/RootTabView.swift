@@ -6,7 +6,7 @@ private enum ViePNTab: Hashable {
 
 struct RootTabView: View {
     @EnvironmentObject private var lunarFamily: LunarFamilyStore
-    @State private var tab: ViePNTab = .today
+    @State private var tab: ViePNTab = .lunar
     @State private var selectedTool: UtilitySection = .money
     @State private var pendingLunarURL: URL?
 
