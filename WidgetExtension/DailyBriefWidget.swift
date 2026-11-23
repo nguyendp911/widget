@@ -7,8 +7,8 @@ struct DailyBriefWidgetView: View {
     let entry: UtilityEntry
     @Environment(\.widgetFamily) private var family
     private var snapshot: UtilitySnapshot { entry.snapshot }
-    private var mint: Color { Color(hex: "#5DE9D8") }
-    private var muted: Color { Color(hex: "#A8B6CD") }
+    private var mint: Color { Color(hex: "#E8C478") }
+    private var muted: Color { Color(hex: "#F3E1C9") }
     private var isLarge: Bool { family == .systemLarge }
 
     private var greeting: String {
@@ -22,9 +22,11 @@ struct DailyBriefWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: isLarge ? 13 : 8) {
             HStack(spacing: 7) {
-                Image(systemName: "sparkles.rectangle.stack").foregroundStyle(mint)
-                Text("LIFE COMMAND").font(.system(size: 10, weight: .black, design: .rounded))
-                    .tracking(1.3)
+                Image("ViePNIconCanChi")
+                    .resizable().scaledToFit().frame(width: 25, height: 25)
+                Text("VIEPN · TỔNG QUAN NGÀY")
+                    .font(.system(size: 10, weight: .semibold, design: .serif))
+                    .tracking(0.55)
                 Spacer()
                 Text(entry.date, format: .dateTime.day().month(.abbreviated))
                     .font(.caption2).foregroundStyle(muted)
@@ -89,15 +91,31 @@ struct DailyBriefWidgetView: View {
                 .buttonStyle(.plain)
             }
             Spacer(minLength: 0)
-            Text("VIEPN / LIFE OS").font(.system(size: 8, weight: .heavy)).tracking(1)
+            Text("VIEPN · NGÀY VIỆT").font(.system(size: 8, weight: .heavy)).tracking(1)
                 .foregroundStyle(muted)
         }
         .padding(isLarge ? 18 : 15)
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .containerBackground(for: .widget) {
-            LinearGradient(colors: [Color(hex: "#15404A"), Color(hex: "#151B31"), Color(hex: "#090C17")],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            GeometryReader { geo in
+                ZStack {
+                    Color(hex: "#431C1A")
+                    Image(isLarge ? "ViePNTrongDongLarge" : "ViePNTrongDongMedium")
+                        .resizable().scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                    LinearGradient(
+                        colors: [Color(hex: "#4B171A").opacity(0.95),
+                                 Color(hex: "#4B171A").opacity(0.75),
+                                 Color(hex: "#401719").opacity(0.46)],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                    RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color(hex: "#EDC573").opacity(0.72), lineWidth: 1.2)
+                        .padding(3)
+                }
+            }
         }
     }
 
