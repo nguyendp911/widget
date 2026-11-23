@@ -11,6 +11,17 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertNil(LunarArtwork.none.resolvedResource(theme: .heritage))
     }
 
+    func testAlmanacFactsHaveConsistentTraditionalData() {
+        let civil = SolarCivilDate(year: 2026, month: 11, day: 23)
+        let facts = LunarAlmanacFacts(civil)
+        XCTAssertFalse(facts.canChiDay.isEmpty)
+        XCTAssertFalse(facts.canChiMonth.isEmpty)
+        XCTAssertFalse(facts.canChiYear.isEmpty)
+        XCTAssertEqual(facts.goodHours.count, 6)
+        XCTAssertTrue(VietnameseLunarCalendar.chi.contains(facts.opposingZodiac))
+        XCTAssertFalse(facts.solarTerm.isEmpty)
+    }
+
     func testTetAndLeapMonths() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(VietnameseLunarCalendar.solarToLunar(tet),

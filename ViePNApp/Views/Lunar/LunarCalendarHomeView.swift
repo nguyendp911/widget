@@ -52,6 +52,22 @@ struct LunarCalendarHomeView: View {
                         }
                     }
                     if mode != .day { dayDetail }
+                    // Daily almanac remains visible without opening an accordion.
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionLabel("LỊCH VẠN NIÊN", subtitle: "Can Chi, tiết khí và giờ tốt hôm nay")
+                        LunarCardView(
+                            kind: .almanac, size: .large, civil: selected,
+                            appearance: family.appearance,
+                            upcomingEvents: LunarEventScheduler.upcoming(
+                                events: family.events, from: selected, count: 3
+                            )
+                        )
+                        .frame(height: 310)
+                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        Text("Tử vi dân gian và ngày tốt–xấu là quan niệm văn hóa, không phải dự đoán cá nhân.")
+                            .font(.system(size: 11))
+                            .foregroundStyle(muted)
+                    }
                 }
                 familyPanel
                 preferencesPanel
@@ -170,6 +186,7 @@ struct LunarCalendarHomeView: View {
                     showcase(kind: .memorial, size: .medium, width: 286, height: 164)
                     showcase(kind: .month, size: .large, width: 280, height: 310)
                     showcase(kind: .tradition, size: .medium, width: 286, height: 164)
+                    showcase(kind: .almanac, size: .large, width: 280, height: 310)
                 }
             }.scrollIndicators(.hidden)
             Text("Nhấn giữ màn hình chính → Sửa → Thêm widget → ViePN Widget+.")

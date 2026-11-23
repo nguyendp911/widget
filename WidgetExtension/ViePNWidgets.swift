@@ -135,6 +135,7 @@ struct ViePNWidgetBundle: WidgetBundle {
         ViePNLunarFamilyWidget()
         ViePNLunarMonthWidget()
         ViePNLunarTraditionWidget()
+        ViePNLunarAlmanacWidget()
         ViePNMoneyWidget()
         ViePNTasksWidget()
         ViePNBillsWidget()

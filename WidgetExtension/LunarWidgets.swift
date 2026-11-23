@@ -132,3 +132,20 @@ struct ViePNLunarTraditionWidget: Widget {
             .supportedFamilies([.systemMedium])
     }
 }
+
+ 
+/// The detailed widget is deliberately a separate family from the month grid.
+/// Large = day, Can Chi, zodiac context, solar term, star/officer, lucky hours,
+/// and the next family event. Medium keeps readable core facts.
+struct ViePNLunarAlmanacWidget: Widget {
+    let kind = "ViePNLunarAlmanac"
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) {
+            LunarWidgetContent(entry: $0, kind: .almanac)
+        }
+        .configurationDisplayName("Lịch Vạn Niên · đầy đủ")
+        .description("Ngày âm dương, Can Chi, sao/trực, tiết khí, giờ hoàng đạo và ngày giỗ.")
+        .contentMarginsDisabled()
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}

@@ -3,7 +3,7 @@ import SwiftUI
 /// A single render path is reused in the gallery preview and WidgetKit.
 /// Visual principles: a large primary number, 1–2 quiet secondary facts, generous whitespace.
 enum LunarCardKind: String, CaseIterable, Identifiable {
-    case today, nextEvent, moonDays, memorial, month, tradition
+    case today, nextEvent, moonDays, memorial, month, tradition, almanac
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -13,6 +13,7 @@ enum LunarCardKind: String, CaseIterable, Identifiable {
         case .memorial: return "Ngày giỗ sắp tới"
         case .month: return "Lịch tháng âm dương"
         case .tradition: return "Ngày truyền thống"
+        case .almanac: return "Vạn niên · Tử vi dân gian"
         }
     }
 }
@@ -52,8 +53,9 @@ struct LunarCardView: View {
                             Image(ornament)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: size == .small ? 72 : 118, height: size == .small ? 70 : 110)
-                                .opacity(theme.usesLightSurface ? 0.18 : 0.22)
+                                .frame(width: size == .small ? 38 : 56, height: size == .small ? 40 : 62)
+                                .interpolation(.high)
+                                .opacity(theme.usesLightSurface ? 0.74 : 0.60)
                                 .padding(.top, size == .small ? 22 : 24)
                                 .padding(.trailing, size == .small ? 4 : 10)
                                 .accessibilityHidden(true)
@@ -74,6 +76,7 @@ struct LunarCardView: View {
                             case .memorial: memorialBody
                             case .month: monthBody
                             case .tradition: traditionBody
+                            case .almanac: almanacBody
                             }
                         }
                         Spacer(minLength: 0)
@@ -299,10 +302,120 @@ struct LunarCardView: View {
         }
     }
 
+    /// Compact almanac for medium and an information-rich large widget.
+    /// The term "tử vi" here means customary zodiac/day information, not predictions.
+    @ViewBuilder
+    private var almanacBody: some View {
+        let facts = LunarAlmanacFacts(civil)
+        if size == .large {
+            VStack(alignment: .leading, spacing: 9) {
+                HStack(alignment: .center, spacing: 14) {
+                    Text("\(civil.day)")
+                        .font(.system(size: 51, weight: .light, design: .serif))
+                        .monospacedDigit()
+                        .foregroundStyle(ink)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("THÁNG \(civil.month) · \(civil.year)")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(muted)
+                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)\(lunar?.isLeapMonth == true ? " nhuận" : "")")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(accent)
+                        Text("Ngày \(facts.canChiDay)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(ink)
+                    }
+                    Spacer(minLength: 0)
+                }
+                separator
+                HStack(alignment: .top, spacing: 10) {
+                    almanacFact("CAN CHI", "Tháng \(facts.canChiMonth)\nNăm \(facts.canChiYear)")
+                    almanacFact("SAO · TRỰC", "\(facts.spirit)\nTrực \(facts.officer)")
+                }
+                HStack(alignment: .top, spacing: 10) {
+                    almanacFact("TIẾT KHÍ", facts.solarTerm)
+                    almanacFact("NGÀY", facts.dayKind)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("GIỜ HOÀNG ĐẠO")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(muted)
+                    Text(facts.goodHoursLabel)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(ink)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if appearance.showFamilyEvents, let event = nextFamily {
+                    HStack(spacing: 5) {
+                        Image(systemName: "heart")
+                        Text("Sắp tới: \(event.title)")
+                            .lineLimit(1)
+                        Spacer(minLength: 3)
+                        Text("\(event.daysRemaining(from: civil)) ngày")
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(accent)
+                } else {
+                    Text("Tử vi dân gian · Tuổi xung ngày: \(facts.opposingZodiac)")
+                        .font(.system(size: 10))
+                        .foregroundStyle(muted)
+                }
+                Text("Thông tin phong tục để tham khảo")
+                    .font(.system(size: 9))
+                    .foregroundStyle(muted)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 9) {
+                    Text("\(civil.day)")
+                        .font(.system(size: 32, weight: .light, design: .serif))
+                        .foregroundStyle(ink)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(accent)
+                        Text(facts.canChiDay)
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    Spacer(minLength: 0)
+                }
+                separator
+                HStack(spacing: 8) {
+                    Text(facts.dayKind + " · Trực " + facts.officer)
+                    Spacer(minLength: 0)
+                    Text(facts.solarTerm)
+                }
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(ink)
+                .lineLimit(1)
+                Text("Giờ tốt: " + facts.goodHoursLabel)
+                    .font(.system(size: 10))
+                    .foregroundStyle(muted)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private func almanacFact(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(label)
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(0.3)
+                .foregroundStyle(muted)
+            Text(value)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(ink)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var lockContent: some View {
         Group {
             switch kind {
-            case .today, .tradition, .month:
+            case .today, .tradition, .month, .almanac:
                 Text("\(lunar?.day ?? 0)/\(lunar?.month ?? 0) ÂL")
             case .moonDays:
                 Text(nextMoon.map { "\($0.name) · \($0.daysUntil) ngày" } ?? "Âm lịch Việt")
