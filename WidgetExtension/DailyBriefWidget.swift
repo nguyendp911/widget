@@ -106,14 +106,14 @@ struct DailyBriefWidgetView: View {
                         .frame(width: geo.size.width, height: geo.size.height)
                         .clipped()
                     LinearGradient(
-                        colors: [Color(hex: "#4B171A").opacity(0.95),
-                                 Color(hex: "#4B171A").opacity(0.75),
-                                 Color(hex: "#401719").opacity(0.46)],
+                        stops: [
+                            .init(color: Color(hex: "#421516").opacity(0.50), location: 0),
+                            .init(color: Color(hex: "#421516").opacity(0.22), location: 0.58),
+                            .init(color: .clear, location: 0.9)
+                        ],
                         startPoint: .leading, endPoint: .trailing
                     )
-                    RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color(hex: "#EDC573").opacity(0.72), lineWidth: 1.2)
-                        .padding(3)
+                    ViePNGoldWidgetBorder()
                 }
             }
         }

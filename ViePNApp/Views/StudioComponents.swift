@@ -2,11 +2,12 @@ import SwiftUI
 
 /// Small reusable UI toolkit for the premium dark appearance.
 enum StudioPalette {
-    static let background = Color(hex: "#080B16")
-    static let surface = Color(hex: "#14182A")
-    static let muted = Color(hex: "#9CA8C6")
-    static let highlight = Color(hex: "#9B8CFF")
-    static let mint = Color(hex: "#5DE9D8")
+    // Vietnamese heritage rather than the old generic blue/purple studio.
+    static let background = Color(hex: "#0D2721")
+    static let surface = Color(hex: "#224339")
+    static let muted = Color(hex: "#D8C4A6")
+    static let highlight = Color(hex: "#B8382D")
+    static let mint = Color(hex: "#E8C271")
 }
 
 struct StudioHeader: View {
@@ -52,7 +53,7 @@ struct StudioPanel<Content: View>: View {
         content
             .padding(16)
             .background(StudioPalette.surface, in: RoundedRectangle(cornerRadius: 22))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(.white.opacity(0.07), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color(hex: "#C79A51").opacity(0.46), lineWidth: 1))
     }
 }
 

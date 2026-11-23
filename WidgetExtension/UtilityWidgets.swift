@@ -93,8 +93,10 @@ private struct UtilityWidgetView: View {
 
     private var compact: Bool { family == .systemSmall }
     private var snap: UtilitySnapshot { entry.snapshot }
-    private var mint: Color { Color(hex: "#F2D28B") }
-    private var muted: Color { Color(hex: "#F1D6BA") }
+    private var paleCard: Bool { type == .bills || type == .focus }
+    private var mint: Color { Color(hex: paleCard ? "#9A3025" : "#F5CF7D") }
+    private var muted: Color { Color(hex: paleCard ? "#705445" : "#F1D6BA") }
+    private var foreground: Color { Color(hex: paleCard ? "#5A3124" : "#FFF4DF") }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
@@ -110,8 +112,9 @@ private struct UtilityWidgetView: View {
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
-            .background(Color(hex: "#6A1B19").opacity(0.80), in: Capsule())
-            .overlay(Capsule().stroke(Color(hex: "#DBAF5A").opacity(0.7), lineWidth: 0.8))
+            .foregroundStyle(paleCard ? Color(hex: "#6A271E") : .white)
+            .background(Color(hex: paleCard ? "#FFEACC" : "#6A1B19").opacity(0.88), in: Capsule())
+            .overlay(Capsule().stroke(Color(hex: "#DBAF5A").opacity(0.88), lineWidth: 0.9))
             Spacer(minLength: 0)
             switch type {
             case .money: money
@@ -129,26 +132,28 @@ private struct UtilityWidgetView: View {
             }
         }
         .padding(compact ? 13 : 17)
-        .foregroundStyle(.white)
+        .foregroundStyle(foreground)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .containerBackground(for: .widget) {
             GeometryReader { geo in
                 ZStack {
-                    Color(hex: "#123E34")
+                    Color(hex: paleCard ? "#FCEDD1" : "#123E34")
                     Image(heritageBackground)
                         .resizable()
                         .scaledToFill()
                         .frame(width: geo.size.width, height: geo.size.height)
                         .clipped()
                     LinearGradient(
-                        colors: [Color(hex: "#123F36").opacity(0.97),
-                                 Color(hex: "#153C36").opacity(0.86),
-                                 Color(hex: "#12302C").opacity(0.42)],
+                        stops: [
+                            .init(color: Color(hex: paleCard ? "#FFEED4" : (type == .money ? "#501719" : "#12392E"))
+                                .opacity(paleCard ? 0.78 : 0.48), location: 0),
+                            .init(color: Color(hex: paleCard ? "#FFF2DE" : "#12392E")
+                                .opacity(paleCard ? 0.56 : 0.28), location: 0.58),
+                            .init(color: .clear, location: 0.91)
+                        ],
                         startPoint: .leading, endPoint: .trailing
                     )
-                    RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color(hex: "#E6B766").opacity(0.63), lineWidth: 1.2)
-                        .padding(3)
+                    ViePNGoldWidgetBorder()
                 }
             }
         }
@@ -160,9 +165,9 @@ private struct UtilityWidgetView: View {
         switch type {
         case .money: return "ViePNTrongDong" + suffix
         case .tasks: return "ViePNSenNgoc" + suffix
-        case .bills: return "ViePNXuanViet" + suffix
+        case .bills: return "ViePNCucVang" + suffix
         case .notes: return "ViePNSenNgoc" + suffix
-        case .focus: return "ViePNTrangTre" + suffix
+        case .focus: return "ViePNXuanViet" + suffix
         }
     }
     private var heritageIconName: String {
