@@ -24,6 +24,18 @@ enum UtilitySection: String, CaseIterable, Identifiable {
     }
 }
 
+extension UtilitySection {
+    var heritageIcon: String {
+        switch self {
+        case .money: return "ViePNIconGoodDay"
+        case .tasks: return "ViePNIconCalendar"
+        case .bills: return "ViePNIconReminder"
+        case .notes: return "ViePNIconBooks"
+        case .focus: return "ViePNIconGoodHours"
+        }
+    }
+}
+
 struct UtilitiesHubView: View {
     @EnvironmentObject private var tools: UtilityStore
     @Binding var selection: UtilitySection
@@ -36,13 +48,49 @@ struct UtilitiesHubView: View {
     var body: some View {
         StudioPage {
             VStack(alignment: .leading, spacing: 20) {
-                StudioHeader(overline: "ViePN / Life OS", title: "Một chạm. Hữu ích.",
-                             subtitle: "Ghi chi tiêu, hoàn thành việc, theo dõi hóa đơn và tập trung — không cần đăng nhập.")
+                VStack(alignment: .leading, spacing: 9) {
+                    ViePNHeritageRibbon(title: "VIEPN · TIỆN ÍCH VIỆT", color: "Red")
+                        .frame(height: 51)
+                    Text("Một chạm. Hữu ích.")
+                        .font(.system(size: 30, weight: .semibold, design: .serif))
+                        .foregroundStyle(Color(hex: "#FAE8C3"))
+                    Text("Sổ chi tiêu · Công việc · Hóa đơn · Ghi chú · Tập trung")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Color(hex: "#E7CFAA"))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(14)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: "#681C1C"), Color(hex: "#183F33")],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    in: RoundedRectangle(cornerRadius: 20)
+                )
+                .overlay(RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color(hex: "#D8B36D").opacity(0.8), lineWidth: 1))
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
                         ForEach(UtilitySection.allCases) { section in
                             Button { selection = section } label: {
-                                AccentChip(text: section.title, icon: section.icon, active: section == selection)
+                                HStack(spacing: 6) {
+                                    Image(section.heritageIcon)
+                                        .resizable().scaledToFit()
+                                        .frame(width: 27, height: 27)
+                                    Text(section.title)
+                                        .font(.system(size: 12, weight: .semibold, design: .serif))
+                                        .foregroundStyle(section == selection
+                                            ? Color(hex: "#66251F") : Color(hex: "#FBE7C4"))
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(
+                                    section == selection
+                                        ? Color(hex: "#F9E9C9") : Color(hex: "#274737"),
+                                    in: Capsule()
+                                )
+                                .overlay(Capsule()
+                                    .stroke(Color(hex: "#D5AA5B").opacity(0.8), lineWidth: 1))
                             }
                             .buttonStyle(.plain)
                         }
