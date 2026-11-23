@@ -3,6 +3,14 @@ import XCTest
 @testable import ViePNWidgetPlus
 
 final class LunarCalendarTests: XCTestCase {
+    func testLunarArtworkDefaultsToIllustratedBackground() {
+        let appearance = LunarAppearance()
+        XCTAssertEqual(appearance.theme, .heritage)
+        XCTAssertNotNil(appearance.artwork.resolvedResource(theme: appearance.theme))
+        XCTAssertNotNil(LunarArtwork.automatic.resolvedResource(theme: .zen))
+        XCTAssertNil(LunarArtwork.none.resolvedResource(theme: .heritage))
+    }
+
     func testTetAndLeapMonths() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(VietnameseLunarCalendar.solarToLunar(tet),

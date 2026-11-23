@@ -51,11 +51,24 @@ private struct LunarWidgetContent: View {
         }
         return URL(string: "viepnwidgetplus://lunar?date=\(entry.civil.year)-\(entry.civil.month)-\(entry.civil.day)")
     }
+    @ViewBuilder
     var body: some View {
-        LunarCardView(kind: kind, size: size, civil: entry.civil, appearance: entry.appearance,
-                      upcomingEvents: entry.family)
-            .containerBackground(Color(hex: entry.appearance.theme.background), for: .widget)
-            .widgetURL(destination)
+        if size == .lock {
+            // Lock Screen accessories are intentionally monochrome and compact.
+            LunarCardView(kind: kind, size: size, civil: entry.civil, appearance: entry.appearance,
+                          upcomingEvents: entry.family, drawsOwnBackground: false)
+                .containerBackground(.clear, for: .widget)
+                .widgetURL(destination)
+        } else {
+            // Put the illustrated art in the actual WidgetKit background.
+            // This fills the whole widget even when WidgetKit applies safe content margins.
+            LunarCardView(kind: kind, size: size, civil: entry.civil, appearance: entry.appearance,
+                          upcomingEvents: entry.family, drawsOwnBackground: false)
+                .containerBackground(for: .widget) {
+                    LunarHeritageBackground(appearance: entry.appearance)
+                }
+                .widgetURL(destination)
+        }
     }
 }
 
@@ -65,6 +78,7 @@ struct ViePNLunarTodayWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .today) }
             .configurationDisplayName("Lịch Âm Tĩnh · Hôm nay")
             .description("Ngày dương, ngày âm và Can Chi với bố cục tối giản.")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryInline, .accessoryRectangular])
     }
 }
@@ -74,6 +88,7 @@ struct ViePNLunarNextWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .nextEvent) }
             .configurationDisplayName("Ngày đẹp – việc nhớ")
             .description("Ngày âm và sự kiện gia đình gần nhất.")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemMedium])
     }
 }
@@ -83,6 +98,7 @@ struct ViePNLunarMoonWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .moonDays) }
             .configurationDisplayName("Mùng 1 & Rằm")
             .description("Còn bao nhiêu ngày đến mùng một và ngày rằm.")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryInline])
     }
 }
@@ -92,6 +108,7 @@ struct ViePNLunarFamilyWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .memorial) }
             .configurationDisplayName("Ngày giỗ sắp tới")
             .description("Nhớ ngày giỗ và những dịp quan trọng của gia đình.")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
@@ -101,6 +118,7 @@ struct ViePNLunarMonthWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .month) }
             .configurationDisplayName("Lịch tháng âm dương")
             .description("Lịch dương và lịch âm trong từng ô ngày.")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemLarge])
     }
 }
@@ -110,6 +128,7 @@ struct ViePNLunarTraditionWidget: Widget {
         StaticConfiguration(kind: kind, provider: LunarWidgetProvider()) { LunarWidgetContent(entry: $0, kind: .tradition) }
             .configurationDisplayName("Chi tiết ngày truyền thống")
             .description("Can Chi, tiết khí và trực theo phong tục (tham khảo).")
+            .contentMarginsDisabled()
             .supportedFamilies([.systemMedium])
     }
 }

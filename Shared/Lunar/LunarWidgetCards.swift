@@ -25,6 +25,7 @@ struct LunarCardView: View {
     let civil: SolarCivilDate
     let appearance: LunarAppearance
     let upcomingEvents: [LunarEventOccurrence]
+    var drawsOwnBackground: Bool = true
 
     private var theme: LunarTheme { appearance.theme }
     private var dateDesign: Font.Design { appearance.useSerif ? .serif : .rounded }
@@ -43,7 +44,9 @@ struct LunarCardView: View {
                 lockContent
             } else {
                 ZStack(alignment: .topTrailing) {
-                    LunarHeritageBackground(appearance: appearance)
+                    if drawsOwnBackground {
+                        LunarHeritageBackground(appearance: appearance)
+                    }
                     if appearance.showOrnament {
                         if let ornament = LunarHeritageArt.ornament(for: theme) {
                             Image(ornament)

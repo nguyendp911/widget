@@ -66,6 +66,26 @@ jobs:
             CODE_SIGN_IDENTITY='' \
             build 2>&1 | tee "$RUNNER_TEMP/viepn-xcodebuild.log"
 
+      - name: Verify illustrated artwork in both application and widget bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/ViePNDerivedData/Build/Products/Release-iphoneos/ViePNWidgetPlus.app"
+          for bundle in "$APP" "$APP/PlugIns/ViePNWidgets.appex"; do
+            test -d "$bundle" || { echo "::error::Missing bundle: $bundle"; exit 1; }
+            assets="$bundle/Assets.car"
+            test -s "$assets" || { echo "::error::Missing Assets.car in $bundle"; exit 1; }
+            listing="$RUNNER_TEMP/$(basename "$bundle")-assets.json"
+            xcrun --sdk iphoneos assetutil --info "$assets" > "$listing"
+            for name in HeritageSpring HeritageTemplePanel HeritageLotus HeritageBadgeMemorial; do
+              grep -Fq "\"$name\"" "$listing" || {
+                echo "::error::Asset $name was not compiled into $(basename "$bundle")"
+                exit 1
+              }
+            done
+            echo "Verified lunar artwork in $(basename "$bundle")"
+          done
+
       - name: Package Payload into unsigned IPA
         shell: bash
         run: |

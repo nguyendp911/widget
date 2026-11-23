@@ -108,7 +108,7 @@ enum LunarArtwork: String, Codable, CaseIterable, Identifiable {
         case .none: return nil
         case .automatic:
             switch theme {
-            case .zen: return nil
+            case .zen: return "HeritageSpring"
             case .heritage: return "HeritageTemplePanel"
             case .tet: return "HeritageSpring"
             case .midAutumn: return "HeritageMoonPanel"
@@ -136,7 +136,7 @@ enum LunarInformationDensity: String, Codable, CaseIterable, Identifiable {
 }
 
 struct LunarAppearance: Codable, Equatable {
-    var theme: LunarTheme = .zen
+    var theme: LunarTheme = .heritage
     var useSerif: Bool = false
     var showCanChi: Bool = true
     var showFamilyEvents: Bool = true
@@ -149,7 +149,7 @@ struct LunarAppearance: Codable, Equatable {
     init() {}
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        theme = try c.decodeIfPresent(LunarTheme.self, forKey: .theme) ?? .zen
+        theme = try c.decodeIfPresent(LunarTheme.self, forKey: .theme) ?? .heritage
         useSerif = try c.decodeIfPresent(Bool.self, forKey: .useSerif) ?? false
         showCanChi = try c.decodeIfPresent(Bool.self, forKey: .showCanChi) ?? true
         showFamilyEvents = try c.decodeIfPresent(Bool.self, forKey: .showFamilyEvents) ?? true

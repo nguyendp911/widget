@@ -5,7 +5,7 @@ import SwiftUI
 enum LunarHeritageArt {
     static func ornament(for theme: LunarTheme) -> String? {
         switch theme {
-        case .zen: return nil
+        case .zen: return "HeritageLotus"
         case .heritage: return "HeritageLotus"
         case .tet: return "HeritagePeach"
         case .midAutumn: return "HeritageLantern"
@@ -43,7 +43,18 @@ struct LunarHeritageBackground: View {
                         .frame(width: proxy.size.width, height: proxy.size.height)
                         .clipped()
                         .overlay(Color(hex: appearance.theme.background)
-                            .opacity(appearance.theme.usesLightSurface ? 0.70 : 0.76))
+                            .opacity(appearance.theme.usesLightSurface ? 0.13 : 0.18))
+                        .overlay(
+                            LinearGradient(
+                                colors: [
+                                    Color(hex: appearance.theme.background)
+                                        .opacity(appearance.theme.usesLightSurface ? 0.28 : 0.25),
+                                    .clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
