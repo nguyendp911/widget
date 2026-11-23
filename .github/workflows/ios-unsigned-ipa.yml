@@ -80,7 +80,7 @@ jobs:
             test -s "$assets" || { echo "::error::Missing Assets.car in $bundle"; exit 1; }
             listing="$RUNNER_TEMP/$(basename "$bundle")-assets.json"
             xcrun --sdk iphoneos assetutil --info "$assets" > "$listing"
-            for name in HeritageSpring HeritageTemplePanel HeritageLotus HeritageBadgeMemorial HeritageTitleGreen HeritageActionCalendar HeritageFestivalTet HeritageNavAdd HeritagePatternJade ViePNXuanVietSmall ViePNXuanVietMedium ViePNXuanVietLarge ViePNVanNienLarge ViePNGioNhaMedium ViePNTrongDongLarge ViePNSenNgocSmall; do
+            for name in HeritageSpring HeritageTemplePanel HeritageLotus HeritageBadgeMemorial HeritageTitleGreen HeritageActionCalendar HeritageFestivalTet HeritageNavAdd HeritagePatternJade ViePNXuanVietSmall ViePNXuanVietMedium ViePNXuanVietLarge ViePNVanNienLarge ViePNGioNhaMedium ViePNTrongDongLarge ViePNSenNgocSmall ViePNIconCalendar ViePNIconCanChi ViePNIconZodiac ViePNIconGoodHours ViePNIconFamily ViePNIconMemorial ViePNIconReminder ViePNTitleRed ViePNTitleCream ViePNTitleJade; do
               grep -Fq "\"$name\"" "$listing" || {
                 echo "::error::Asset $name was not compiled into $(basename "$bundle")"
                 exit 1
