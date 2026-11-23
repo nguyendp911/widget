@@ -134,5 +134,6 @@ struct ViePNWidgetBundle: WidgetBundle {
         ViePNBillsWidget()
         ViePNNotesWidget()
         ViePNFocusWidget()
+        ViePNDailyBriefWidget()
     }
 }

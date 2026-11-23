@@ -108,7 +108,7 @@ the App Store and uses no Apple Developer certificates or private keys.
 
 ## Life OS: widgets hữu ích (2026-11)
 
-Ngoài Living Canvas, phiên bản này có **5 widget độc lập** trong Widget Gallery của iOS:
+Ngoài Living Canvas, phiên bản này có **6 widget độc lập + 1 Life Command tổng hợp** trong Widget Gallery của iOS:
 
 | Widget | Chức năng trực tiếp | Dữ liệu |
 | --- | --- | --- |
@@ -117,6 +117,7 @@ Ngoài Living Canvas, phiên bản này có **5 widget độc lập** trong Widg
 | Hóa đơn | Xem ngày đến hạn, đánh dấu đã thanh toán | Hóa đơn lặp theo tháng (ngày 1–28) |
 | Ghi chú nhanh | Xem ghi chú gần nhất, chạm mở ViePN | Ghi chú cục bộ, có tùy chọn che nội dung |
 | Deep Focus | Bắt đầu/dừng phiên 25 phút, đếm ngược | Phiên tập trung cục bộ |
+| Life Command | Một widget chứa ngân sách, việc, hạn hóa đơn và phiên tập trung | Tổng hợp dữ liệu đã nhập |
 
 Trong ứng dụng, mở tab **Tiện ích (Life OS)** để nhập dữ liệu, quản lý ngân sách và tạo các mục. Widget Extension truy cập bản sao dữ liệu cục bộ bằng **App Groups**. Không có kết nối ngân hàng, không truy cập SMS, không đọc tin nhắn hay thực hiện thanh toán. Việc cập nhật widget phụ thuộc cơ chế điều phối của iOS; bộ đếm giờ dùng hiển thị thời gian của hệ thống.
 

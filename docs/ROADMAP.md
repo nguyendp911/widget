@@ -35,6 +35,7 @@
 - Quick notes and app deep link, with privacy switch for content shown on the Home screen.
 - 25/50-minute Focus session and interactive Focus widget.
 - Today summary combining remaining budget, open tasks, upcoming bill.
+- Life Command: one configurable medium/large widget merging spending, tasks, bills and focus.
 
 ### Planned, not implemented yet
 - Local notification scheduling for due bills and finished focus sessions (permission flow and tests required).
