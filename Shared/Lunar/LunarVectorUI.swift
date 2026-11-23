@@ -47,8 +47,9 @@ struct LunarVectorHeader: View {
     let theme: LunarTheme
     var compact: Bool = false
     var glyph: LunarGlyph = .calendar
+    var darkVariant: Bool? = nil
 
-    private var dark: Bool { !theme.usesLightSurface }
+    private var dark: Bool { darkVariant ?? !theme.usesLightSurface }
 
     var body: some View {
         HStack(spacing: compact ? 5 : 8) {
@@ -96,19 +97,21 @@ struct LunarVectorFact: View {
     let title: String
     let value: String
     let theme: LunarTheme
+    var darkVariant: Bool? = nil
 
+    private var dark: Bool { darkVariant ?? !theme.usesLightSurface }
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
             LunarVectorIcon(glyph: glyph, theme: theme, size: 21)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(hex: theme.muted))
+                    .foregroundStyle(dark ? Color(hex: "#F4D8AD") : Color(hex: theme.muted))
                     .lineLimit(1)
                     .minimumScaleFactor(0.83)
                 Text(value)
                     .font(.system(size: 11, weight: .medium, design: .serif))
-                    .foregroundStyle(Color(hex: theme.foreground))
+                    .foregroundStyle(dark ? Color(hex: "#FFF3DD") : Color(hex: theme.foreground))
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -118,7 +121,8 @@ struct LunarVectorFact: View {
         .padding(.horizontal, 5)
         .padding(.vertical, 5)
         .background(
-            Color(hex: theme.secondaryBackground).opacity(theme.usesLightSurface ? 0.70 : 0.42),
+            (dark ? Color(hex: "#113E34") : Color(hex: theme.secondaryBackground))
+                .opacity(dark ? 0.74 : 0.76),
             in: RoundedRectangle(cornerRadius: 9)
         )
     }
@@ -128,13 +132,16 @@ struct LunarVectorInline: View {
     let glyph: LunarGlyph
     let value: String
     let theme: LunarTheme
+    var darkVariant: Bool? = nil
+
+    private var dark: Bool { darkVariant ?? !theme.usesLightSurface }
 
     var body: some View {
         HStack(spacing: 5) {
             LunarVectorIcon(glyph: glyph, theme: theme, size: 18)
             Text(value)
                 .font(.system(size: 10, weight: .medium, design: .serif))
-                .foregroundStyle(Color(hex: theme.foreground))
+                .foregroundStyle(dark ? Color(hex: "#FFF3DD") : Color(hex: theme.foreground))
                 .lineLimit(1)
                 .minimumScaleFactor(0.82)
             Spacer(minLength: 0)
