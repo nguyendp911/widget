@@ -159,9 +159,12 @@ enum VietnameseLunarCalendar {
     static func solarToLunar(_ solar: SolarCivilDate) -> VietnameseLunarDate? {
         guard isValid(solar) else { return nil }
         let j = jdn(solar)
-        let k = Int(floor((Double(j) - 2415021.076998695) / 29.530588853))
-        var start = newMoonDay(k + 1)
-        if start > j { start = newMoonDay(k) }
+        // Mean-cycle estimate can land one lunation too late near a new moon.
+        // Bracket the day explicitly; otherwise rare dates produce lunar day 0.
+        var k = Int(floor((Double(j) - 2415021.076998695) / 29.530588853))
+        while newMoonDay(k) > j { k -= 1 }
+        while newMoonDay(k + 1) <= j { k += 1 }
+        let start = newMoonDay(k)
         var a11 = month11(solar.year)
         var b11 = a11
         var year: Int
@@ -184,7 +187,7 @@ enum VietnameseLunarCalendar {
 
     /// Returns nil for impossible dates (day 30 in a 29-day lunar month, nonexistent leap month).
     static func lunarToSolar(_ lunar: VietnameseLunarDate) -> SolarCivilDate? {
-        guard (1...12).contains(lunar.month), (1...30).contains(lunar.day), (1900...2100).contains(lunar.year) else { return nil }
+        guard (1...12).contains(lunar.month), (1...30).contains(lunar.day), (1899...2100).contains(lunar.year) else { return nil }
         let a11: Int
         let b11: Int
         if lunar.month < 11 { a11 = month11(lunar.year - 1); b11 = month11(lunar.year) }

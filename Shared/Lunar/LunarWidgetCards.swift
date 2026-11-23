@@ -215,7 +215,21 @@ struct LunarCardView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 2)
                     .background(day == civil ? accent.opacity(0.12) : Color.clear, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(alignment: .topTrailing) {
+                        if upcomingEvents.contains(where: { $0.solar == day }) {
+                            Circle().fill(accent).frame(width: 3, height: 3)
+                        }
+                    }
                 }
+            }
+            if appearance.showFamilyEvents, let event = nextFamily {
+                HStack(spacing: 6) {
+                    Image(systemName: "heart.text.square").foregroundStyle(accent)
+                    Text("Sắp tới: \(event.title)").lineLimit(1)
+                    Spacer(minLength: 2)
+                    Text(event.solar.label).foregroundStyle(accent)
+                }
+                .font(.system(size: 10, weight: .medium))
             }
         }
     }

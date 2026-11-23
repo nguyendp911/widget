@@ -42,6 +42,6 @@ Canvas editor uses hit-target gestures on top of the shared renderer, with selec
 - `WidgetExtension/LunarWidgets.swift`: six WidgetKit kinds, supported Home/Lock families, timeline entries for VN dates, deep links to lunar calendar and matching family event.
 - `ViePNApp/Views/Lunar/LunarCalendarHomeView.swift`: four calendar modes, theme previews, family list, notification opt-in, ICS export and culture.
 - `ViePNApp/Stores/LunarFamilyStore.swift`: notification permission and scheduling. Rolling local notification queue (bounded); reschedule on foreground and mutation. Do not promise indefinite background refresh since iOS imposes delivery and queue limits.
-- `scripts/run_lunar_smoke.sh`: independently executable Foundation-only regression suite for 11 Vietnamese Tết dates, leap months, annual memorials, month length, `.ics` and 555 sampled roundtrips.
+- `scripts/run_lunar_smoke.sh`: independently executable Foundation-only regression suite for 11 Vietnamese Tết dates, leap months, annual memorials, month length, `.ics` and 73,049 exhaustive roundtrips (1900–2099), including start-of-century and new-moon boundary cases.
 
 UI rule: Small widget → date at glance. Medium → date plus the next memorial. Large → lunar/solar month. Lock Screen → one short line. Theme highlight occupies under 10% of the visual surface, fonts use iOS system + one optional serif accent. No continuously animated widget or fabricated precise astronomical times.

@@ -56,17 +56,20 @@ import Foundation
         assert(ics.contains("BEGIN:VCALENDAR") && ics.contains("END:VCALENDAR"), "ICS markers")
         assert(ics.components(separatedBy: "BEGIN:VEVENT").count == 6, "exact 5 occurrences")
         assert(!ics.contains("RRULE"), "no solar yearly RRULE")
-        // Check one day every ten days through 2022–2036, including leap-month years.
+        // Exhaustive civil-day roundtrip across 1900–2099, including edge cases
+        // 07 May 2054 / 09 April 2062 that exposed a naive new-moon bracket bug.
         var days = 0
-        for year in 2022...2036 {
-            let first = VietnameseLunarCalendar.jdn(SolarCivilDate(year: year, month: 1, day: 1))
-            let last = VietnameseLunarCalendar.jdn(SolarCivilDate(year: year, month: 12, day: 31))
-            for jd in stride(from: first, through: last, by: 10) {
-                let day = VietnameseLunarCalendar.civilDate(jd)
-                guard let lunar = VietnameseLunarCalendar.solarToLunar(day) else { continue }
-                assert(VietnameseLunarCalendar.lunarToSolar(lunar) == day, "solar-lunar roundtrip \(day.label)")
-                days += 1
+        let first = VietnameseLunarCalendar.jdn(SolarCivilDate(year: 1900, month: 1, day: 1))
+        let last = VietnameseLunarCalendar.jdn(SolarCivilDate(year: 2099, month: 12, day: 31))
+        for jd in first...last {
+            let day = VietnameseLunarCalendar.civilDate(jd)
+            guard let lunar = VietnameseLunarCalendar.solarToLunar(day) else {
+                assert(false, "missing conversion \(day.label)")
+                continue
             }
+            assert(lunar.day >= 1 && lunar.day <= 30, "valid lunar day \(day.label)")
+            assert(VietnameseLunarCalendar.lunarToSolar(lunar) == day, "solar-lunar roundtrip \(day.label)")
+            days += 1
         }
         print("PASS: \(tet.count) Tet dates; leap month rules; 13 annual memorials; ICS; \(days) round-trips; mùng 1 / Rằm")
     }
