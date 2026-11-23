@@ -5,6 +5,7 @@ private enum ViePNTab: Hashable {
 }
 
 struct RootTabView: View {
+    @EnvironmentObject private var lunarFamily: LunarFamilyStore
     @State private var tab: ViePNTab = .today
     @State private var selectedTool: UtilitySection = .money
     @State private var pendingLunarURL: URL?
@@ -22,9 +23,21 @@ struct RootTabView: View {
             NavigationStack { StudioHomeView() }
                 .tabItem { Label("Canvas", systemImage: "square.3.layers.3d") }.tag(ViePNTab.studio)
         }
-        .tint(StudioPalette.mint)
-        .toolbarColorScheme(.dark, for: .tabBar)
-        .preferredColorScheme(.dark)
+        .tint(tab == .lunar ? Color(hex: lunarFamily.appearance.theme.accent) : StudioPalette.mint)
+        .toolbarBackground(
+            tab == .lunar
+                ? Color(hex: lunarFamily.appearance.theme.secondaryBackground)
+                : Color(hex: "#1E2426"),
+            for: .tabBar
+        )
+        .toolbarBackground(.visible, for: .tabBar)
+        .toolbarColorScheme(
+            tab == .lunar && lunarFamily.appearance.theme.usesLightSurface ? .light : .dark,
+            for: .tabBar
+        )
+        .preferredColorScheme(
+            tab == .lunar && lunarFamily.appearance.theme.usesLightSurface ? .light : .dark
+        )
         .onOpenURL { url in
             guard url.scheme == "viepnwidgetplus" else { return }
             switch url.host {

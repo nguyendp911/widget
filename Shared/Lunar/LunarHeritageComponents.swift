@@ -68,38 +68,30 @@ enum LunarHeritageComponents {
     }
 }
 
+/// Quiet, responsive section typography. Never stretch the illustrated title plaques:
+/// those are source-art previews, not nine-slice UI backgrounds.
 struct LunarHeritageSectionTitle: View {
     let title: String
     let theme: LunarTheme
+
     var body: some View {
-        if theme == .zen {
+        HStack(alignment: .center, spacing: 7) {
+            Capsule()
+                .fill(Color(hex: theme.accent))
+                .frame(width: 3, height: 14)
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(1.1)
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .tracking(1.2)
                 .foregroundStyle(Color(hex: theme.accent))
-        } else {
-            ZStack {
-                if LunarHeritageComponents.available(LunarHeritageComponents.ribbonImage(for: theme)) {
-                    Image(LunarHeritageComponents.ribbonImage(for: theme))
-                        .resizable(capInsets: EdgeInsets(top: 14, leading: 43, bottom: 14, trailing: 43), resizingMode: .stretch)
-                        .frame(height: 39)
-                } else {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color(hex: theme.secondaryBackground))
-                        .overlay(RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color(hex: theme.accent).opacity(0.35), lineWidth: 1))
-                }
-                Text(title)
-                    .font(.system(size: 11, weight: .semibold, design: .serif))
-                    .foregroundStyle(theme == .heritage || theme == .tet ? Color(hex: "#6D3426") : .white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .padding(.horizontal, 20)
-            }
-            .frame(height: 39)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+            Spacer(minLength: 0)
         }
+        .frame(minHeight: 20)
+        .accessibilityAddTraits(.isHeader)
     }
 }
+
 
 struct LunarHeritageActionButton: View {
     let assetName: String
@@ -147,21 +139,13 @@ struct LunarHeritageFestivalIllustration: View {
     }
 }
 
+/// Subtle hairline only. Repeating intricate tile art at 4 points made the page noisy.
 struct LunarHeritagePatternDivider: View {
     let theme: LunarTheme
     var body: some View {
-        Group {
-            if LunarHeritageComponents.available(LunarHeritageComponents.patternImage(for: theme)) {
-                Image(LunarHeritageComponents.patternImage(for: theme))
-                    .resizable(resizingMode: .tile)
-                    .frame(height: 4)
-                    .opacity(0.25)
-            } else {
-                Rectangle()
-                    .fill(Color(hex: theme.accent).opacity(0.12))
-                    .frame(height: 1)
-            }
-        }
-        .accessibilityHidden(true)
+        Rectangle()
+            .fill(Color(hex: theme.accent).opacity(0.10))
+            .frame(height: 1)
+            .accessibilityHidden(true)
     }
 }
