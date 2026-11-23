@@ -167,7 +167,8 @@ struct ViePNThienNienVietWidget: Widget {
                     appearance: entry.appearance, family: "Large", kind: .almanac
                 )
             }
-            .widgetURL(ThienNienSection.date.url(for: entry.civil))
+            // No parent widgetURL: it can shadow section-specific Link targets.
+            // All nine rows and the title have their own Link(destination:).
         }
         .configurationDisplayName("Thiên Niên Việt · Toàn cảnh")
         .description("Âm dương, Can Chi, tử vi dân gian, giờ tốt, tiết khí, lễ và ngày giỗ. Chạm để xem chi tiết.")

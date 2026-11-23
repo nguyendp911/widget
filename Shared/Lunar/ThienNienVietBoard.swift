@@ -23,7 +23,7 @@ struct ThienNienVietBoard: View {
         ZStack {
             if drawsOwnBackground { background }
             VStack(alignment: .leading, spacing: compact ? 3 : 9) {
-                titleBanner
+                linked(.date) { titleBanner }
                 linked(.date) { dateSummary }
                 Rectangle().fill(gold.opacity(0.55)).frame(height: 1)
                 linked(.canChi) {

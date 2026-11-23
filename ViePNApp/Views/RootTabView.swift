@@ -4,11 +4,20 @@ private enum ViePNTab: Hashable {
     case today, lunar, tools, gallery, studio
 }
 
+/// Root-level presentation survives a cold app launch from a WidgetKit Link.
+/// A child sheet may miss the first URL while its tab is still being created.
+private struct ThienNienModalRequest: Identifiable {
+    let id = UUID()
+    let section: ThienNienSection
+    let civil: SolarCivilDate
+}
+
 struct RootTabView: View {
     @EnvironmentObject private var lunarFamily: LunarFamilyStore
     @State private var tab: ViePNTab = .lunar
     @State private var selectedTool: UtilitySection = .money
     @State private var pendingLunarURL: URL?
+    @State private var modalRequest: ThienNienModalRequest?
 
     var body: some View {
         TabView(selection: $tab) {
@@ -40,6 +49,17 @@ struct RootTabView: View {
         )
         .onOpenURL { url in
             guard url.scheme == "viepnwidgetplus" else { return }
+            // Resolve the WidgetKit section URL at the root before switching tabs:
+            // it reliably presents the matching sheet on cold and warm launches.
+            if let route = ThienNienSection.destination(from: url) {
+                tab = .lunar
+                modalRequest = ThienNienModalRequest(
+                    section: route.section,
+                    civil: route.date ?? SolarCivilDate(date: Date())
+                        ?? SolarCivilDate(year: 2026, month: 11, day: 23)
+                )
+                return
+            }
             switch url.host {
             case "lunar", "family":
                 pendingLunarURL = url
@@ -55,5 +75,27 @@ struct RootTabView: View {
                 }
             }
         }
+        .sheet(item: $modalRequest) { request in
+            ThienNienDetailSheet(
+                section: request.section,
+                civil: request.civil,
+                familyEvents: lunarFamily.events
+            )
+        }
+        #if DEBUG
+        .onAppear {
+            // Simulator screenshot mode for visually verifying the actual modal.
+            // The flag is excluded from the Release iPhone build.
+            if let key = ProcessInfo.processInfo.environment["VIEPN_PREVIEW_MODAL"],
+               let section = ThienNienSection(rawValue: key) {
+                tab = .lunar
+                modalRequest = ThienNienModalRequest(
+                    section: section,
+                    civil: SolarCivilDate(date: Date())
+                        ?? SolarCivilDate(year: 2026, month: 11, day: 23)
+                )
+            }
+        }
+        #endif
     }
 }
