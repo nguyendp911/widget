@@ -37,10 +37,10 @@ struct LunarCalendarHomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 hero
-                heritageShortcuts
                 VStack(alignment: .leading, spacing: 10) {
-                    sectionLabel("THIÊN NIÊN VIỆT",
-                                 subtitle: "Một bảng lịch đầy đủ · Chạm từng mục để xem")
+                    Text("Chạm từng mục trên bảng lịch để xem chi tiết")
+                        .font(.system(size: 12))
+                        .foregroundStyle(muted)
                     ThienNienVietBoard(
                         civil: selected, appearance: family.appearance,
                         upcomingEvents: LunarEventScheduler.upcoming(
@@ -51,6 +51,7 @@ struct LunarCalendarHomeView: View {
                     )
                     .fixedSize(horizontal: false, vertical: true)
                 }
+                heritageShortcuts
                 widgetShowcase
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("TRA CỨU LỊCH", subtitle: "Từng ngày, từng tháng âm dương")
@@ -66,22 +67,6 @@ struct LunarCalendarHomeView: View {
                         }
                     }
                     if mode != .day { dayDetail }
-                    // Daily almanac remains visible without opening an accordion.
-                    VStack(alignment: .leading, spacing: 10) {
-                        sectionLabel("LỊCH VẠN NIÊN", subtitle: "Can Chi, tiết khí và giờ tốt hôm nay")
-                        LunarCardView(
-                            kind: .almanac, size: .large, civil: selected,
-                            appearance: family.appearance,
-                            upcomingEvents: LunarEventScheduler.upcoming(
-                                events: family.events, from: selected, count: 3
-                            )
-                        )
-                        .frame(height: 310)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        Text("Tử vi dân gian: tuổi của ngày, tuổi xung; không thay thế lá số tử vi cá nhân.")
-                            .font(.system(size: 11))
-                            .foregroundStyle(muted)
-                    }
                 }
                 familyPanel
                 preferencesPanel
