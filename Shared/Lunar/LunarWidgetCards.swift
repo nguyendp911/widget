@@ -43,12 +43,23 @@ struct LunarCardView: View {
                 lockContent
             } else {
                 ZStack(alignment: .topTrailing) {
-                    Color(hex: theme.background)
+                    LunarHeritageBackground(appearance: appearance)
                     if appearance.showOrnament {
-                        Circle().stroke(accent.opacity(0.09), lineWidth: 1)
-                            .frame(width: 124, height: 124).offset(x: 44, y: -50)
-                        Circle().stroke(accent.opacity(0.06), lineWidth: 1)
-                            .frame(width: 162, height: 162).offset(x: 42, y: -54)
+                        if let ornament = LunarHeritageArt.ornament(for: theme) {
+                            Image(ornament)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: size == .small ? 72 : 118, height: size == .small ? 70 : 110)
+                                .opacity(theme.usesLightSurface ? 0.18 : 0.22)
+                                .padding(.top, size == .small ? 22 : 24)
+                                .padding(.trailing, size == .small ? 4 : 10)
+                                .accessibilityHidden(true)
+                        } else {
+                            Circle().stroke(accent.opacity(0.09), lineWidth: 1)
+                                .frame(width: 124, height: 124).offset(x: 44, y: -50)
+                            Circle().stroke(accent.opacity(0.06), lineWidth: 1)
+                                .frame(width: 162, height: 162).offset(x: 42, y: -54)
+                        }
                     }
                     VStack(alignment: .leading, spacing: size == .small ? 6 : 10) {
                         heading
@@ -274,7 +285,13 @@ struct LunarCardView: View {
 
     private var footer: some View {
         HStack {
-            if lunar?.isLeapMonth == true {
+            if appearance.showOrnament && theme != .zen,
+               let status = LunarHeritageArt.statusBadge(kind: kind, lunar: lunar,
+                                                          hasFamilyEvent: nextFamily != nil && appearance.showFamilyEvents) {
+                Image(status)
+                    .resizable().scaledToFit().frame(width: 92, height: 25)
+                    .accessibilityLabel(lunar?.isLeapMonth == true ? "Tháng nhuận" : kind == .memorial ? "Ngày giỗ" : lunar?.day == 1 ? "Mùng một" : "Ngày rằm")
+            } else if lunar?.isLeapMonth == true {
                 Text("THÁNG NHUẬN").font(.system(size: 9, weight: .semibold)).foregroundStyle(accent)
             } else if lunar?.day == 1 || lunar?.day == 15 {
                 Text(lunar?.day == 15 ? "NGÀY RẰM" : "MÙNG MỘT")

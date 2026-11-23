@@ -75,6 +75,54 @@ enum LunarTheme: String, CaseIterable, Codable, Identifiable {
     var usesLightSurface: Bool { self == .zen || self == .heritage || self == .tet }
 }
 
+/// Choice of art cut from the user's original Vietnamese heritage sprite sheet.
+/// `automatic` follows the selected theme; `none` provides the original minimal look.
+enum LunarArtwork: String, Codable, CaseIterable, Identifiable {
+    case automatic, none, spring, drum, lotus, moon, temple, chrysanthemum
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .automatic: return "Tự động"
+        case .none: return "Không ảnh"
+        case .spring: return "Xuân Việt"
+        case .drum: return "Trống đồng"
+        case .lotus: return "Sen xanh"
+        case .moon: return "Trăng tre"
+        case .temple: return "Cổng làng"
+        case .chrysanthemum: return "Cúc vàng"
+        }
+    }
+    var resourceName: String? {
+        switch self {
+        case .automatic, .none: return nil
+        case .spring: return "HeritageSpring"
+        case .drum: return "HeritageDrumPanel"
+        case .lotus: return "HeritageLotusPanel"
+        case .moon: return "HeritageMoonPanel"
+        case .temple: return "HeritageTemplePanel"
+        case .chrysanthemum: return "HeritageChrysanthemumPanel"
+        }
+    }
+    func resolvedResource(theme: LunarTheme) -> String? {
+        switch self {
+        case .none: return nil
+        case .automatic:
+            switch theme {
+            case .zen: return nil
+            case .heritage: return "HeritageTemplePanel"
+            case .tet: return "HeritageSpring"
+            case .midAutumn: return "HeritageMoonPanel"
+            case .luxury: return "HeritageDrumPanel"
+            case .jade: return "HeritageLotusPanel"
+            case .gold: return "HeritageChrysanthemumPanel"
+            case .ink: return "HeritageMoonPanel"
+            case .lotus: return "HeritageLotusPanel"
+            }
+        default: return resourceName
+        }
+    }
+}
+
 enum LunarInformationDensity: String, Codable, CaseIterable, Identifiable {
     case essential, balanced, detailed
     var id: String { rawValue }
@@ -94,9 +142,10 @@ struct LunarAppearance: Codable, Equatable {
     var showFamilyEvents: Bool = true
     var density: LunarInformationDensity = .balanced
     var showOrnament: Bool = true
+    var artwork: LunarArtwork = .automatic
     var remindMoonDays: Bool = false
 
-    enum CodingKeys: String, CodingKey { case theme, useSerif, showCanChi, showFamilyEvents, density, showOrnament, remindMoonDays }
+    enum CodingKeys: String, CodingKey { case theme, useSerif, showCanChi, showFamilyEvents, density, showOrnament, remindMoonDays, artwork }
     init() {}
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -106,6 +155,7 @@ struct LunarAppearance: Codable, Equatable {
         showFamilyEvents = try c.decodeIfPresent(Bool.self, forKey: .showFamilyEvents) ?? true
         density = try c.decodeIfPresent(LunarInformationDensity.self, forKey: .density) ?? .balanced
         showOrnament = try c.decodeIfPresent(Bool.self, forKey: .showOrnament) ?? true
+        artwork = try c.decodeIfPresent(LunarArtwork.self, forKey: .artwork) ?? .automatic
         remindMoonDays = try c.decodeIfPresent(Bool.self, forKey: .remindMoonDays) ?? false
     }
 }

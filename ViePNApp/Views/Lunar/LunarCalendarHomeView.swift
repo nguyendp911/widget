@@ -110,6 +110,15 @@ struct LunarCalendarHomeView: View {
                 .font(.system(size: 28, weight: .regular, design: .serif)).tracking(-0.7)
             Text("Một chút bình yên, một ngày không quên.")
                 .font(.system(size: 13)).foregroundStyle(muted)
+            if let imageName = LunarHeritageArt.ornament(for: theme), family.appearance.showOrnament {
+                HStack(spacing: 9) {
+                    Image(imageName)
+                        .resizable().scaledToFit().frame(width: 32, height: 25)
+                        .accessibilityHidden(true)
+                    Text("Bộ tranh Việt · \(theme.title)")
+                        .font(.system(size: 10)).foregroundStyle(muted)
+                }.padding(.top, 2)
+            }
         }
     }
 
@@ -300,6 +309,45 @@ struct LunarCalendarHomeView: View {
                     }
                 }
             }.scrollIndicators(.hidden)
+            Text("TRANH NỀN TỪ BỘ ASSET VIỆT")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1.0).foregroundStyle(muted)
+            ScrollView(.horizontal) {
+                HStack(spacing: 10) {
+                    ForEach(LunarArtwork.allCases) { art in
+                        Button { updateAppearance { $0.artwork = art } } label: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 11)
+                                        .fill(Color(hex: theme.background))
+                                    if let imageName = art.resolvedResource(theme: theme) {
+                                        GeometryReader { proxy in
+                                            Image(imageName).resizable().scaledToFill()
+                                                .frame(width: proxy.size.width, height: proxy.size.height)
+                                                .clipped()
+                                        }
+                                    } else {
+                                        Image(systemName: art == .none ? "circle.slash" : "moon.stars")
+                                            .foregroundStyle(accent)
+                                    }
+                                }
+                                .frame(width: 111, height: 72)
+                                .clipShape(RoundedRectangle(cornerRadius: 11))
+                                .overlay(RoundedRectangle(cornerRadius: 11)
+                                    .stroke(family.appearance.artwork == art ? accent : accent.opacity(0.16),
+                                            lineWidth: family.appearance.artwork == art ? 2 : 1))
+                                Text(art.title)
+                                    .font(.system(size: 10, weight: family.appearance.artwork == art ? .semibold : .regular))
+                                    .foregroundStyle(ink).lineLimit(1)
+                            }
+                            .frame(width: 111)
+                        }.buttonStyle(.plain)
+                        .accessibilityLabel("Tranh nền: \(art.title)")
+                    }
+                }
+            }.scrollIndicators(.hidden)
+            Text("Ảnh minh họa được cắt từ bộ asset bạn cung cấp. Màu nền được phủ nhẹ để ngày âm và lời nhắc vẫn dễ đọc.")
+                .font(.system(size: 10)).foregroundStyle(muted)
             Picker("Mật độ thông tin", selection: Binding(get: { family.appearance.density }, set: { value in updateAppearance { $0.density = value } })) {
                 ForEach(LunarInformationDensity.allCases) { item in Text(item.label).tag(item) }
             }.font(.system(size: 12))
