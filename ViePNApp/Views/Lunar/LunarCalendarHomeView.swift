@@ -7,6 +7,12 @@ private enum LunarViewMode: String, CaseIterable, Identifiable {
 }
 
 struct LunarCalendarHomeView: View {
+    @Binding private var incomingURL: URL?
+
+    init(incomingURL: Binding<URL?> = .constant(nil)) {
+        _incomingURL = incomingURL
+    }
+
     @EnvironmentObject private var family: LunarFamilyStore
     @State private var selected = SolarCivilDate(date: Date()) ?? SolarCivilDate(year: 2026, month: 11, day: 23)
     @State private var mode: LunarViewMode = .month
@@ -65,8 +71,15 @@ struct LunarCalendarHomeView: View {
         .alert("Không thể xuất lịch", isPresented: Binding(get: { exportError != nil }, set: { if !$0 { exportError = nil } })) {
             Button("OK") { exportError = nil }
         } message: { Text(exportError ?? "") }
-        .onOpenURL(perform: handleURL)
+        .onAppear(perform: consumeIncomingLink)
+        .onChange(of: incomingURL) { _, _ in consumeIncomingLink() }
         .task { await family.syncNotifications() }
+    }
+
+    private func consumeIncomingLink() {
+        guard let url = incomingURL else { return }
+        handleURL(url)
+        incomingURL = nil
     }
 
     private func handleURL(_ url: URL) {

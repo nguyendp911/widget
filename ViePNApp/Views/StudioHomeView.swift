@@ -50,6 +50,28 @@ struct StudioHomeView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                NavigationLink {
+                    ThemeFusionView()
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "paintpalette.fill")
+                            .font(.title2)
+                            .foregroundStyle(StudioPalette.mint)
+                            .frame(width: 44, height: 44)
+                            .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 13))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Theme Fusion").font(.headline).foregroundStyle(.white)
+                            Text("Bộ hình nền và widget đồng bộ")
+                                .font(.caption).foregroundStyle(StudioPalette.muted)
+                        }
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(StudioPalette.mint)
+                    }
+                    .padding(16)
+                    .background(StudioPalette.surface, in: RoundedRectangle(cornerRadius: 20))
+                }
+                .buttonStyle(.plain)
             }
         }
         .navigationTitle("Magic Canvas")
