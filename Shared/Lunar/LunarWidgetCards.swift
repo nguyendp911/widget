@@ -79,7 +79,7 @@ struct LunarCardView: View {
                             }
                         }
                         Spacer(minLength: 0)
-                        if size != .small { footer }
+                        if size != .small && kind != .almanac { footer }
                     }
                     .padding(size == .small ? 13 : 18)
                 }
@@ -371,13 +371,9 @@ struct LunarCardView: View {
                     }
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(accent)
-                } else {
-                    Text("Tử vi dân gian · Tuổi xung ngày: \(facts.opposingZodiac)")
-                        .font(.system(size: 10))
-                        .foregroundStyle(muted)
                 }
-                Text("Thông tin phong tục để tham khảo")
-                    .font(.system(size: 9))
+                Text("Tử vi dân gian (tham khảo) · Tuổi xung: \(facts.opposingZodiac)")
+                    .font(.system(size: 10))
                     .foregroundStyle(muted)
             }
         } else {
@@ -406,6 +402,10 @@ struct LunarCardView: View {
                 .lineLimit(1)
                 Text("Giờ tốt: " + facts.goodHoursLabel)
                     .font(.system(size: 10))
+                    .foregroundStyle(muted)
+                    .lineLimit(1)
+                Text("Tuổi xung ngày: " + facts.opposingZodiac + " · Phong tục tham khảo")
+                    .font(.system(size: 9))
                     .foregroundStyle(muted)
                     .lineLimit(1)
             }
