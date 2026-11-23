@@ -90,8 +90,12 @@ struct LunarCardView: View {
 
     private var heading: some View {
         HStack(spacing: 6) {
-            Image(systemName: "moon.phase.waning.crescent")
-                .font(.system(size: 11, weight: .medium)).foregroundStyle(accent)
+            if theme == .zen {
+                Image(systemName: "moon.phase.waning.crescent")
+                    .font(.system(size: 11, weight: .medium)).foregroundStyle(accent)
+            } else {
+                Image("HeritageDongSon").resizable().scaledToFit().frame(width: 17, height: 17)
+            }
             Text("LỊCH ÂM TĨNH")
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
                 .tracking(1.5).foregroundStyle(muted)
@@ -185,6 +189,8 @@ struct LunarCardView: View {
     private var memorialBody: some View {
         VStack(alignment: .leading, spacing: 7) {
             if let event = nextFamily, appearance.showFamilyEvents {
+                Image(event.kind == .memorial ? "HeritageGate" : "HeritageLotus")
+                    .resizable().scaledToFit().frame(width: 24, height: 24)
                 Text(event.title).font(.system(size: size == .small ? 18 : 26, weight: .medium, design: .serif))
                     .lineLimit(2).minimumScaleFactor(0.75)
                 Text("\(event.daysRemaining(from: civil))")
