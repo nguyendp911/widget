@@ -259,6 +259,22 @@ struct LunarCardView: View {
                     }
                 }
             }
+            if appearance.density != .essential {
+                let facts = LunarAlmanacFacts(civil)
+                separator
+                HStack(spacing: 5) {
+                    Text("Can Chi: \(facts.canChiDay)")
+                    Spacer(minLength: 2)
+                    Text(facts.dayKind + " · Trực " + facts.officer)
+                }
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(ink)
+                .lineLimit(1)
+                Text("Tiết khí: \(facts.solarTerm) · Giờ tốt: \(facts.goodHoursLabel)")
+                    .font(.system(size: 9))
+                    .foregroundStyle(muted)
+                    .lineLimit(2)
+            }
             if appearance.showFamilyEvents, let event = nextFamily {
                 HStack(spacing: 6) {
                     Image(systemName: "heart.text.square").foregroundStyle(accent)
