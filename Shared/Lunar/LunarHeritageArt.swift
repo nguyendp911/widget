@@ -29,33 +29,35 @@ enum LunarHeritageArt {
     }
 }
 
-/// High-detail Vietnamese scenes, pre-rasterized to each widget family
-/// instead of stretching low-resolution tiles from a sprite sheet.
+/// Full-bleed family art stays visible; only the text side gets a veil.
+/// The chosen illustration now follows the approved layout for each widget kind.
 struct LunarHeritageBackground: View {
     let appearance: LunarAppearance
     var family: String = "Medium"
+    var kind: LunarCardKind = .today
 
     var body: some View {
         GeometryReader { proxy in
-            let light = appearance.theme.usesLightSurface
-            let surface = Color(hex: appearance.theme.secondaryBackground)
+            let skin = LunarWidgetSkin(kind: kind, appearance: appearance)
             ZStack {
                 Color(hex: appearance.theme.background)
-                if let name = appearance.artwork.resolvedResource(theme: appearance.theme, family: family) {
+                if let name = skin.artworkName(family: family) {
                     Image(name)
                         .resizable()
                         .interpolation(.high)
                         .scaledToFill()
                         .frame(width: proxy.size.width, height: proxy.size.height)
                         .clipped()
-                        // Legibility only where text tends to sit; artwork
-                        // remains visible at the far edge.
-                        .overlay {
+                        .overlay(alignment: .leading) {
+                            // Approved compositions show the flower, moon, temple and
+                            // Dong Son motifs. Do not bleach the whole illustration.
                             LinearGradient(
                                 stops: [
-                                    .init(color: surface.opacity(light ? 0.77 : 0.79), location: 0.0),
-                                    .init(color: surface.opacity(light ? 0.64 : 0.67), location: 0.54),
-                                    .init(color: surface.opacity(light ? 0.11 : 0.18), location: 1.0)
+                                    .init(color: (skin.dark ? Color.black : Color.white)
+                                        .opacity(skin.dark ? 0.32 : 0.34), location: 0),
+                                    .init(color: (skin.dark ? Color.black : Color.white)
+                                        .opacity(skin.dark ? 0.18 : 0.23), location: 0.52),
+                                    .init(color: .clear, location: 0.88)
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -63,10 +65,14 @@ struct LunarHeritageBackground: View {
                         }
                 } else {
                     LinearGradient(
-                        colors: [surface, Color(hex: appearance.theme.background)],
+                        colors: [
+                            Color(hex: appearance.theme.secondaryBackground),
+                            Color(hex: appearance.theme.background)
+                        ],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     )
                 }
+                ViePNGoldWidgetBorder()
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
