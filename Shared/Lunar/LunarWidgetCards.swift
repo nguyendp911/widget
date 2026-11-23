@@ -54,7 +54,6 @@ struct LunarCardView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: size == .small ? 38 : 56, height: size == .small ? 40 : 62)
-                                .interpolation(.high)
                                 .opacity(theme.usesLightSurface ? 0.74 : 0.60)
                                 .padding(.top, size == .small ? 22 : 24)
                                 .padding(.trailing, size == .small ? 4 : 10)
