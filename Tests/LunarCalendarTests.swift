@@ -15,9 +15,9 @@ final class LunarCalendarTests: XCTestCase {
         let appearance = LunarAppearance()
         let expected: [(LunarCardKind, String)] = [
             (.today, "ViePNTrongDongMedium"),
-            (.nextEvent, "ViePNSenNgocMedium"),
+            (.nextEvent, "ViePNGioNhaMedium"),
             (.moonDays, "ViePNTrangTreMedium"),
-            (.memorial, "ViePNGioNhaMedium"),
+            (.memorial, "ViePNSenNgocMedium"),
             (.month, "ViePNCongLangMedium"),
             (.tradition, "ViePNCucVangMedium"),
             (.almanac, "ViePNVanNienMedium")
@@ -29,6 +29,12 @@ final class LunarCalendarTests: XCTestCase {
         XCTAssertTrue(LunarWidgetSkin(kind: .today, appearance: appearance).dark)
         XCTAssertTrue(LunarWidgetSkin(kind: .memorial, appearance: appearance).dark)
         XCTAssertFalse(LunarWidgetSkin(kind: .almanac, appearance: appearance).dark)
+        XCTAssertFalse(LunarWidgetSkin(kind: .nextEvent, appearance: appearance).dark)
+        var jade = appearance
+        jade.artwork = .lotus
+        XCTAssertTrue(LunarWidgetSkin(kind: .month, appearance: jade).dark)
+        jade.artwork = .gioNha
+        XCTAssertFalse(LunarWidgetSkin(kind: .memorial, appearance: jade).dark)
 
         var custom = appearance
         custom.artwork = .spring
