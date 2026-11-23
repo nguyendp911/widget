@@ -44,10 +44,11 @@ struct LunarVectorHeader: View {
     let title: String
     let theme: LunarTheme
     var compact: Bool = false
+    var glyph: LunarGlyph = .calendar
 
     var body: some View {
         HStack(spacing: 7) {
-            LunarVectorIcon(glyph: .calendar, theme: theme, size: compact ? 17 : 20)
+            LunarVectorIcon(glyph: glyph, theme: theme, size: compact ? 17 : 20)
             Text(title)
                 .font(.system(size: compact ? 9 : 11, weight: .bold, design: .rounded))
                 .tracking(compact ? 0.55 : 0.9)

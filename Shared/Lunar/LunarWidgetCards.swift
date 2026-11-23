@@ -104,7 +104,8 @@ struct LunarCardView: View {
             LunarVectorHeader(
                 title: kind == .almanac ? "LỊCH VẠN NIÊN · CAN CHI" : "LỊCH ÂM TĨNH",
                 theme: theme,
-                compact: size == .small || size == .medium
+                compact: size == .small || size == .medium,
+                glyph: kind == .almanac ? .zodiac : .calendar
             )
             if isSpecial && size == .small {
                 Circle()
