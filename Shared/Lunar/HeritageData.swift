@@ -45,12 +45,17 @@ enum HeritageSearch {
     static func date(_ text: String, year: Int) -> SolarCivilDate? {
         let q = normalized(text)
         let nums = q.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
-        let isLunar = q.contains("ram") || q.contains("mung") || q.contains("am") || q.contains("nhuan")
+        // Match complete words: "nam" (năm) and "thang" (tháng)
+        // must not accidentally mark a civil date as lunar.
+        let words = Set(q.split(whereSeparator: { !$0.isLetter }).map(String.init))
+        let isLunar = !words.isDisjoint(with: ["ram", "mung", "am", "nhuan"])
+        let explicitlySolar = words.contains("duong")
+        guard !(isLunar && explicitlySolar) else { return nil }
         if isLunar {
             let day: Int
             let month: Int
             let y: Int
-            if q.contains("ram") {
+            if words.contains("ram") {
                 guard let m = nums.first else { return nil }
                 day = 15; month = m; y = nums.count > 1 ? nums[1] : year
             } else {
@@ -59,10 +64,10 @@ enum HeritageSearch {
             }
             guard (1...30).contains(day), (1...12).contains(month), (1900...2100).contains(y) else { return nil }
             return VietnameseLunarCalendar.lunarToSolar(
-                VietnameseLunarDate(day: day, month: month, year: y, isLeapMonth: q.contains("nhuan")))
+                VietnameseLunarDate(day: day, month: month, year: y, isLeapMonth: words.contains("nhuan")))
         }
-        guard nums.count == 3 else { return nil }
-        let result = SolarCivilDate(year: nums[2], month: nums[1], day: nums[0])
+        guard nums.count == 2 || nums.count == 3 else { return nil }
+        let result = SolarCivilDate(year: nums.count == 3 ? nums[2] : year, month: nums[1], day: nums[0])
         return VietnameseLunarCalendar.isValid(result) ? result : nil
     }
 }
