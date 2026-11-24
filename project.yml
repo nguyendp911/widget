@@ -8,8 +8,8 @@ settings:
     SWIFT_VERSION: "5.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1"
-    MARKETING_VERSION: "3.3.0"
-    CURRENT_PROJECT_VERSION: "24"
+    MARKETING_VERSION: "3.4.0"
+    CURRENT_PROJECT_VERSION: "25"
     CODE_SIGN_STYLE: Automatic
 
 targets:
@@ -20,6 +20,7 @@ targets:
       - path: ViePNApp/ThienNienVietApp.swift
       - path: ViePNApp/Stores/HeritageStore.swift
       - path: ViePNApp/Views/Lunar/HeritageUI.swift
+      - path: ViePNApp/Views/Lunar/HeritageAstrologyView.swift
       - path: ViePNApp/Views/Lunar/HeritageFamilyView.swift
       - path: ViePNApp/Views/Lunar/HeritageCalendarView.swift
       - path: Shared/Lunar/HeritageData.swift
