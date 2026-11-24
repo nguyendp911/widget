@@ -11,6 +11,16 @@ final class LunarOnlyTests: XCTestCase {
         XCTAssertNil(HeritageSearch.date("31/2/2026", year: 2026))
     }
 
+    func testCivilSearchWithVietnameseYearWords() {
+        let expected = SolarCivilDate(year: 2026, month: 11, day: 24)
+        XCTAssertEqual(HeritageSearch.date("Ngày 24 tháng 11 năm 2026", year: 2025), expected)
+        XCTAssertEqual(HeritageSearch.date("24/11 dương", year: 2026), expected)
+        XCTAssertNil(HeritageSearch.date("15/7/2028 âm dương", year: 2026))
+        XCTAssertEqual(HeritageSearch.date("15/7/2028 âm", year: 2026),
+                       VietnameseLunarCalendar.lunarToSolar(
+                         VietnameseLunarDate(day: 15, month: 7, year: 2028, isLeapMonth: false)))
+    }
+
     func testHeritageArchiveRoundTrip() throws {
         let archive = HeritageArchive(events: [], tasks: ["test": HeritageRitual.preparation(for: .memorial)], people: [HeritagePerson(name: "Ông", relationship: "Ông nội")], memories: [HeritageMemory(title: "Ngày nhớ", text: "Gia đình")])
         let restored = try JSONDecoder().decode(HeritageArchive.self, from: JSONEncoder().encode(archive))
