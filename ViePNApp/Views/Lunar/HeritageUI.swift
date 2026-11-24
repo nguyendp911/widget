@@ -110,6 +110,8 @@ struct HeritageRootView: View {
                 .tabItem { Label("Lịch âm", systemImage: "calendar") }
             NavigationStack { HeritageFamilyView() }
                 .tabItem { Label("Gia đình", systemImage: "person.2") }
+            NavigationStack { HeritageAstrologyView() }
+                .tabItem { Label("Thiên mệnh", systemImage: "sparkles") }
             NavigationStack { HeritageCultureView() }
                 .tabItem { Label("Văn hóa", systemImage: "book") }
         }
