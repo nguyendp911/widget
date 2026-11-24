@@ -102,7 +102,7 @@ struct ThienNienDetailSheet: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
                     ForEach(VietnameseLunarCalendar.chi, id: \.self) { branch in
                         VStack(spacing: 4) {
-                            HeritageZodiacSeal(branch: branch)
+                            HeritageAnimalArtwork(branch: branch)
                                 .frame(width: 72, height: 72)
                             Text(LunarAlmanacFacts.animal(branch))
                                 .font(.caption.weight(.medium))
@@ -345,7 +345,7 @@ private struct HeritageBirthLookup: View {
             if let civil, let facts,
                let lunar = VietnameseLunarCalendar.solarToLunar(civil) {
                 HStack(spacing: 16) {
-                    HeritageZodiacSeal(branch: facts.yearAnimal)
+                    HeritageAnimalArtwork(branch: facts.yearAnimal)
                         .frame(width: 98, height: 98)
                     VStack(alignment: .leading, spacing: 6) {
                         Text(facts.canChiYear).font(.system(.title2, design: .serif).weight(.bold))
