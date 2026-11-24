@@ -41,7 +41,7 @@ struct ThienNienDetailSheet: View {
                     }
                     .padding(.bottom, 4)
                     content
-                    Text("Thông tin Can Chi, giờ hoàng đạo và ngày tốt–xấu được cung cấp theo quy ước lịch dân gian để tham khảo; không phải dự đoán vận mệnh cá nhân.")
+                    Text(section == .solarTerms ? "Ngày giao tiết được tính gần đúng theo kinh độ Mặt Trời và múi giờ Việt Nam (UTC+7)." : "Thông tin Can Chi, giờ hoàng đạo và ngày tốt–xấu được cung cấp theo quy ước lịch dân gian để tham khảo; không phải dự đoán vận mệnh cá nhân.")
                         .font(.system(size: 11))
                         .foregroundStyle(muted)
                         .fixedSize(horizontal: false, vertical: true)
@@ -144,26 +144,7 @@ struct ThienNienDetailSheet: View {
                 }
             }
         case .solarTerms:
-            group("24 TIẾT KHÍ TRONG NĂM") {
-                detail("Tiết khí hiện tại", facts.solarTerm)
-                ForEach(Array(VietnameseLunarCalendar.terms.enumerated()), id: \.offset) { row in
-                    HStack {
-                        Text(String(format: "%02d", row.offset + 1))
-                            .font(.system(size: 11, weight: .semibold)).foregroundStyle(accent)
-                            .frame(width: 26)
-                        Text(row.element)
-                            .font(.system(size: 14, weight: .medium, design: .serif))
-                            .foregroundStyle(ink)
-                        Spacer()
-                        if row.element == facts.solarTerm {
-                            Text("Hiện tại")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(accent)
-                        }
-                    }
-                    .padding(.vertical, 3)
-                }
-            }
+            SolarTermLibraryView(civil: civil)
         case .memorials:
             group("NGÀY GIỖ & NGÀY NHỚ") {
                 if upcoming.isEmpty {
