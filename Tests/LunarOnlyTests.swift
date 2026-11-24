@@ -3,6 +3,15 @@ import XCTest
 @testable import ViePNWidgetPlus
 
 final class LunarOnlyTests: XCTestCase {
+    func testWesternSignApproximateBoundaries() {
+        XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 20)), .pisces)
+        XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 21)), .aries)
+        XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 12, day: 22)), .capricorn)
+        XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 1, day: 19)), .capricorn)
+        XCTAssertEqual(WesternSign.allCases.count, 12)
+        XCTAssertEqual(Set(VietnameseLunarCalendar.chi.map { HeritageArtCatalog.animal($0) }).count, 12)
+    }
+
     func testNaturalDateSearch() {
         let expected = VietnameseLunarCalendar.lunarToSolar(
             VietnameseLunarDate(day: 15, month: 7, year: 2028, isLeapMonth: false))
