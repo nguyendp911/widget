@@ -8,6 +8,15 @@ struct HeritageFamilyView: View {
     @EnvironmentObject private var family: LunarFamilyStore
     @EnvironmentObject private var heritage: HeritageStore
     @State private var horizon = 90
+    @State private var eventQuery = ""
+    @State private var kindFilter: FamilyEventKind? = nil
+    private var matchingEvents: [LunarFamilyEvent] {
+        let q = HeritageSearch.normalized(eventQuery)
+        return family.events.filter { event in
+            (kindFilter == nil || event.kind == kindFilter) &&
+            (q.isEmpty || HeritageSearch.normalized(event.title + " " + event.note).contains(q))
+        }
+    }
     @State private var addEvent = false
     @State private var editEvent: LunarFamilyEvent?
     @State private var checklist: LunarEventOccurrence?
@@ -18,7 +27,7 @@ struct HeritageFamilyView: View {
     @State private var message: String?
     private var today: SolarCivilDate { SolarCivilDate(date: Date()) ?? SolarCivilDate(year: 2026, month: 11, day: 24) }
     private var events: [LunarEventOccurrence] {
-        LunarEventScheduler.upcoming(events: family.events, from: today, count: 500, years: 2)
+        LunarEventScheduler.upcoming(events: matchingEvents, from: today, count: 500, years: 2)
             .filter { $0.daysRemaining(from: today) <= horizon }
     }
 
@@ -32,6 +41,20 @@ struct HeritageFamilyView: View {
                     Spacer()
                     Button { addEvent = true } label: { Label("Thêm", systemImage: "plus.circle.fill") }
                 }
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "magnifyingglass").foregroundStyle(HeritagePalette.soft)
+                        TextField("Tìm ngày giỗ, tên người thân…", text: $eventQuery)
+                        if !eventQuery.isEmpty {
+                            Button { eventQuery = "" } label: { Image(systemName: "xmark.circle.fill") }
+                                .accessibilityLabel("Xóa tìm kiếm")
+                        }
+                    }
+                    Picker("Loại sự kiện", selection: $kindFilter) {
+                        Text("Tất cả").tag(nil as FamilyEventKind?)
+                        ForEach(FamilyEventKind.allCases) { kind in Text(kind.label).tag(Optional(kind)) }
+                    }
+                }.padding(14).heritageFrame()
                 Picker("Khoảng thời gian", selection: $horizon) {
                     ForEach([7,30,90,365], id: \.self) { Text("\($0) ngày").tag($0) }
                 }.pickerStyle(.segmented)
@@ -39,7 +62,11 @@ struct HeritageFamilyView: View {
                 ForEach(events) { item in
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            Image("TNVIncense").resizable().scaledToFit().frame(width: 43, height: 40)
+                            if item.kind == .memorial {
+                                HeritageLotusMark(tint: HeritagePalette.gold).frame(width: 43, height: 40)
+                            } else {
+                                Image(systemName: item.kind.icon).font(.title2).foregroundStyle(HeritagePalette.red).frame(width: 43, height: 40)
+                            }
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(item.title).font(.system(size: 17, weight: .semibold, design: .serif))
                                 Text("Âm \(item.lunar.label) · Dương \(item.solar.label)").font(.caption).foregroundStyle(HeritagePalette.soft)
@@ -47,6 +74,18 @@ struct HeritageFamilyView: View {
                             Spacer(minLength: 0)
                             Text(item.daysRemaining(from: today) == 0 ? "Hôm nay" : "Còn \(item.daysRemaining(from: today)) ngày")
                                 .font(.caption.weight(.semibold)).foregroundStyle(HeritagePalette.red)
+                        }
+                        if item.isAdjustedForShortMonth {
+                            Label("Đã chuyển sang cuối tháng âm thiếu", systemImage: "calendar.badge.clock")
+                                .font(.caption).foregroundStyle(HeritagePalette.soft)
+                        }
+                        if let tasks = heritage.tasks[item.id], !tasks.isEmpty {
+                            HStack {
+                                ProgressView(value: Double(tasks.filter(\.done).count), total: Double(tasks.count))
+                                    .tint(HeritagePalette.gold)
+                                Text("\(tasks.filter(\.done).count)/\(tasks.count) việc")
+                                    .font(.caption).foregroundStyle(HeritagePalette.soft)
+                            }
                         }
                         HStack {
                             Button("Chuẩn bị") { checklist = item }
@@ -56,7 +95,10 @@ struct HeritageFamilyView: View {
                     }.padding(13).heritageFrame()
                 }
                 HeritagePlaque(title: "Tất cả ngày nhớ")
-                ForEach(family.events) { item in
+                if matchingEvents.isEmpty {
+                    Text("Không có ngày nhớ phù hợp.").font(.subheadline).foregroundStyle(HeritagePalette.soft)
+                }
+                ForEach(matchingEvents) { item in
                     Button { editEvent = item } label: {
                         HStack {
                             Text(item.title)
