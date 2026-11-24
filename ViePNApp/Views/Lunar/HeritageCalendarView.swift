@@ -93,7 +93,7 @@ struct HeritageCalendarView: View {
         .foregroundStyle(HeritagePalette.ink)
         .navigationTitle("Lịch âm")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $section) { item in ThienNienDetailSheet(section: item, civil: day, familyEvents: family.events) }
+        .fullScreenCover(item: $section) { item in ThienNienDetailSheet(section: item, civil: day, familyEvents: family.events) }
     }
 
     private var dateRange: ClosedRange<Date> {
@@ -211,8 +211,8 @@ struct HeritageCultureView: View {
         .foregroundStyle(HeritagePalette.ink)
         .navigationTitle("Văn hóa Việt")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $topic) { item in ThienNienDetailSheet(section: item, civil: today, familyEvents: []) }
-        .sheet(item: $selected) { festival in
+        .fullScreenCover(item: $topic) { item in ThienNienDetailSheet(section: item, civil: today, familyEvents: []) }
+        .fullScreenCover(item: $selected) { festival in
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -226,7 +226,8 @@ struct HeritageCultureView: View {
                     }.padding(16)
                 }.background(HeritagePalette.paper.ignoresSafeArea())
                     .navigationTitle("Lễ Việt").navigationBarTitleDisplayMode(.inline)
-            }.presentationDragIndicator(.visible)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Đóng") { selected = nil } } }
+            }
         }
     }
 
