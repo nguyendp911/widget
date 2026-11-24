@@ -10,6 +10,7 @@ struct ThienNienDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddEvent = false
     @State private var highlighted: SolarCivilDate?
+    @State private var selectedAnimal: AnimalGuide?
     private let ink = Color(hex: "#572D24")
     private let muted = Color(hex: "#83644E")
     private let accent = Color(hex: "#982723")
@@ -60,6 +61,9 @@ struct ThienNienDetailSheet: View {
             }
             .tint(accent)
         }
+        .fullScreenCover(item: $selectedAnimal) { item in
+            ZodiacArticleView(guide: item, referenceYear: civil.year)
+        }
         .fullScreenCover(isPresented: $showingAddEvent) {
             NavigationStack { LunarEventEditorView() }
         }
@@ -98,13 +102,16 @@ struct ThienNienDetailSheet: View {
             HeritageBirthLookup()
             group("MƯỜI HAI CON GIÁP VIỆT") {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
-                    ForEach(VietnameseLunarCalendar.chi, id: \.self) { branch in
-                        VStack(spacing: 4) {
-                            HeritageAnimalArtwork(branch: branch)
-                                .frame(width: 72, height: 72)
-                            Text(LunarAlmanacFacts.animal(branch))
-                                .font(.caption.weight(.medium))
-                        }.frame(maxWidth: .infinity)
+                    ForEach(AnimalGuide.all) { guide in
+                        Button { selectedAnimal = guide } label: {
+                            VStack(spacing: 6) {
+                                HeritageAnimalArtwork(branch: guide.branch)
+                                    .frame(width: 84, height: 84)
+                                Text(guide.branch + " · " + guide.animal)
+                                    .font(.caption.weight(.semibold))
+                                Text(guide.yinYang + " " + guide.element).font(.caption2).foregroundStyle(muted)
+                            }.frame(maxWidth: .infinity)
+                        }.buttonStyle(.plain)
                     }
                 }
             }
@@ -337,6 +344,15 @@ private struct HeritageBirthLookup: View {
                 .foregroundStyle(HeritagePalette.ink)
                 .background(HeritagePalette.paper, in: RoundedRectangle(cornerRadius: 14))
                 result("Can Chi năm", facts.canChiYear)
+                if let nap = NapAmGuide.lookup(facts.canChiYear) {
+                    result("Nạp âm năm sinh", nap.name + " · " + nap.element)
+                }
+                if let guide = AnimalGuide.named(facts.yearAnimal) {
+                    result("Ngũ hành Địa Chi", guide.yinYang + " " + guide.element)
+                    result("Tam hợp", guide.trine)
+                    result("Lục hợp", guide.harmony)
+                    result("Lục xung", guide.opposing)
+                }
                 result("Can Chi tháng", facts.canChiMonth)
                 result("Can Chi ngày", facts.canChiDay)
                 result("Can Chi giờ", hourCycle)
