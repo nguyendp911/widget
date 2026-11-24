@@ -60,9 +60,7 @@ struct ThienNienDetailSheet: View {
             }
             .tint(accent)
         }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-        .sheet(isPresented: $showingAddEvent) {
+        .fullScreenCover(isPresented: $showingAddEvent) {
             NavigationStack { LunarEventEditorView() }
         }
     }
