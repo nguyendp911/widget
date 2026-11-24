@@ -3,6 +3,22 @@ import XCTest
 @testable import ViePNWidgetPlus
 
 final class LunarOnlyTests: XCTestCase {
+    func testNaturalDateSearch() {
+        let expected = VietnameseLunarCalendar.lunarToSolar(
+            VietnameseLunarDate(day: 15, month: 7, year: 2028, isLeapMonth: false))
+        XCTAssertEqual(HeritageSearch.date("Rằm tháng 7 năm 2028", year: 2026), expected)
+        XCTAssertEqual(HeritageSearch.date("24/11/2026", year: 2026), SolarCivilDate(year: 2026, month: 11, day: 24))
+        XCTAssertNil(HeritageSearch.date("31/2/2026", year: 2026))
+    }
+
+    func testHeritageArchiveRoundTrip() throws {
+        let archive = HeritageArchive(events: [], tasks: ["test": HeritageRitual.preparation(for: .memorial)], people: [HeritagePerson(name: "Ông", relationship: "Ông nội")], memories: [HeritageMemory(title: "Ngày nhớ", text: "Gia đình")])
+        let restored = try JSONDecoder().decode(HeritageArchive.self, from: JSONEncoder().encode(archive))
+        XCTAssertEqual(restored.people, archive.people)
+        XCTAssertEqual(restored.tasks, archive.tasks)
+        XCTAssertEqual(restored.memories, archive.memories)
+    }
+
     func testStandaloneLunarConversions() {
         let tet = SolarCivilDate(year: 2026, month: 2, day: 17)
         XCTAssertEqual(

@@ -8,8 +8,8 @@ settings:
     SWIFT_VERSION: "5.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1"
-    MARKETING_VERSION: "3.0.0"
-    CURRENT_PROJECT_VERSION: "21"
+    MARKETING_VERSION: "3.1.0"
+    CURRENT_PROJECT_VERSION: "22"
     CODE_SIGN_STYLE: Automatic
 
 targets:
@@ -18,6 +18,11 @@ targets:
     platform: iOS
     sources:
       - path: ViePNApp/ThienNienVietApp.swift
+      - path: ViePNApp/Stores/HeritageStore.swift
+      - path: ViePNApp/Views/Lunar/HeritageUI.swift
+      - path: ViePNApp/Views/Lunar/HeritageFamilyView.swift
+      - path: ViePNApp/Views/Lunar/HeritageCalendarView.swift
+      - path: Shared/Lunar/HeritageData.swift
       - path: ViePNApp/Stores/LunarFamilyStore.swift
       - path: ViePNApp/Views/Lunar/ThienNienHomeView.swift
       - path: ViePNApp/Views/Lunar/ThienNienLunarBoard.swift
@@ -41,6 +46,7 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
+        NSCalendarsFullAccessUsageDescription: "Cho phép kiểm tra và thêm ngày nhớ âm lịch vào lịch iPhone, tránh tạo sự kiện trùng."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIRequiresFullScreen: false

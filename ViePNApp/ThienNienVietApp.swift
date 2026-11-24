@@ -5,13 +5,13 @@ import SwiftUI
 @main
 struct ThienNienVietApp: App {
     @StateObject private var family = LunarFamilyStore()
+    @StateObject private var heritage = HeritageStore()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                ThienNienHomeView()
-            }
+            HeritageRootView()
+            .environmentObject(heritage)
             .environmentObject(family)
             .tint(Color(hex: "#9A3226"))
             .onChange(of: scenePhase) { _, phase in

@@ -32,3 +32,6 @@ GitHub Actions có thể tạo IPA **chưa ký** trên macOS; IPA cần ký trư
 
 ## Mục tiêu tiếp theo
 Kiểm chứng thông báo lịch giỗ qua các năm, nâng cấp danh sách sự kiện gia đình, xây dựng lịch tuần/năm, tra cứu thuận tiện và hoàn thiện tính khả dụng theo Accessibility.
+
+## 3.1 — Di sản Việt
+Bổ sung 7 asset SVG độc lập, thẻ âm dương đỏ son, bố cục 4 tab lịch Việt, tìm ngày bằng cụm từ đơn giản, lịch tuần/tháng/năm, so sánh ngày, lọc hoàng đạo, dòng thời gian gia đình, checklist theo lần diễn ra, phân công và dự trù, gia phả mini, nhật ký ảnh, nhập/xuất JSON, xuất Apple Calendar, thư viện lễ Việt. Tệp JSON có thể chia sẻ hoặc lưu thủ công vào iCloud Drive. Đồng bộ CloudKit, phân quyền thành viên, nguồn bách khoa chuyên sâu và trợ lý AI có căn cứ chưa được triển khai; cần thiết lập dịch vụ, ký ứng dụng phù hợp và xác minh nội dung.

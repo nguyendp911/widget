@@ -78,25 +78,7 @@ struct ThienNienHomeView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 10) {
-                Image("ViePNIconCulture")
-                    .resizable().scaledToFit().frame(width: 39, height: 39)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("THIÊN NIÊN VIỆT")
-                        .font(.system(size: 12, weight: .bold, design: .serif))
-                        .tracking(1.1)
-                        .foregroundStyle(wine)
-                    Text("Lịch âm Việt · Ngày nhớ · Gia đình")
-                        .font(.system(size: 12))
-                        .foregroundStyle(soft)
-                }
-                Spacer()
-            }
-            Text("Mỗi ngày một điều đáng nhớ.")
-                .font(.system(size: 25, weight: .semibold, design: .serif))
-                .foregroundStyle(ink)
-        }
+        HeritageBanner(title: "Thiên Niên Việt", subtitle: "Lịch âm & Văn hóa Việt")
     }
 
     private var dateNavigator: some View {
@@ -113,6 +95,7 @@ struct ThienNienHomeView: View {
                 ),
                 displayedComponents: .date
             )
+            .environment(\.timeZone, VietnameseLunarCalendar.vietnamTimeZone)
             .datePickerStyle(.compact)
             .labelsHidden()
             .frame(maxWidth: .infinity)

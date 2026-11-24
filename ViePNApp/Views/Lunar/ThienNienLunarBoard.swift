@@ -18,36 +18,9 @@ struct ThienNienLunarBoard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            banner
             Button { onOpen(.date) } label: {
-                HStack(alignment: .center, spacing: 14) {
-                    Text("\(civil.day)")
-                        .font(.system(size: 70, weight: .regular, design: .serif))
-                        .monospacedDigit()
-                        .foregroundStyle(wine)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("DƯƠNG LỊCH")
-                            .font(.system(size: 10, weight: .semibold))
-                            .tracking(1)
-                            .foregroundStyle(soft)
-                        Text("\(civil.day) tháng \(civil.month), \(civil.year)")
-                            .font(.system(size: 15, weight: .semibold, design: .serif))
-                            .foregroundStyle(ink)
-                        Text("Âm \(lunar?.day ?? 0)/\(lunar?.month ?? 0)/\(lunar?.year ?? civil.year)\(lunar?.isLeapMonth == true ? " nhuận" : "")")
-                            .font(.system(size: 16, weight: .semibold, design: .serif))
-                            .foregroundStyle(wine)
-                        Text("Ngày \(facts.canChiDay) · \(facts.dayKind)")
-                            .font(.system(size: 12))
-                            .foregroundStyle(soft)
-                    }
-                    Spacer(minLength: 2)
-                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(gold)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(Color(hex: "#FFFAEC").opacity(0.96), in: RoundedRectangle(cornerRadius: 15))
-            }
-            .buttonStyle(.plain)
+                HeritageDayHero(day: civil, lunar: lunar, facts: facts, appearance: appearance)
+            }.buttonStyle(.plain)
 
             Divider().overlay(gold.opacity(0.7))
 
@@ -97,12 +70,14 @@ struct ThienNienLunarBoard: View {
             GeometryReader { geometry in
                 ZStack {
                     Color(hex: "#F3E2C4")
-                    Image(appearance.artwork.resolvedResource(theme: appearance.theme, family: "Large") ?? "ViePNVanNienLarge")
+                    if let asset = appearance.artwork.resolvedResource(theme: appearance.theme, family: "Large") {
+                    Image(asset)
                         .resizable()
                         .scaledToFill()
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
-                        .opacity(0.30)
+                        .opacity(0.16)
+                    }
                     Color(hex: "#FFF5DF").opacity(0.26)
                 }
             }
@@ -164,13 +139,30 @@ struct ThienNienLunarBoard: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 11)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(hex: "#FFFBF0").opacity(0.96),
-                        in: RoundedRectangle(cornerRadius: 13))
-            .overlay(RoundedRectangle(cornerRadius: 13)
-                .stroke(gold.opacity(0.15), lineWidth: 0.7))
+            .background {
+                ZStack(alignment: .trailing) {
+                    Color(hex: "#FFFBF0")
+                    if appearance.showOrnament {
+                        Image(ornament(section)).resizable().scaledToFit().frame(width: 83).opacity(0.26)
+                    }
+                }.clipShape(RoundedRectangle(cornerRadius: 13))
+            }
+            .overlay(RoundedRectangle(cornerRadius: 13).stroke(gold, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(gold.opacity(0.3), lineWidth: 0.5).padding(3))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Xem chi tiết \(section.title)")
+    }
+
+    private func ornament(_ section: ThienNienSection) -> String {
+        switch section {
+        case .canChi: return "TNVBamboo"
+        case .zodiac: return "TNVBlossom"
+        case .hours, .auspicious, .observances: return "TNVCloud"
+        case .solarTerms: return "TNVMountain"
+        case .memorials: return "TNVLotus"
+        default: return "TNVDrum"
+        }
     }
 
     private var familySummary: String {
