@@ -8,8 +8,8 @@ settings:
     SWIFT_VERSION: "5.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1"
-    MARKETING_VERSION: "3.7.1"
-    CURRENT_PROJECT_VERSION: "29"
+    MARKETING_VERSION: "3.8.0"
+    CURRENT_PROJECT_VERSION: "30"
     CODE_SIGN_STYLE: Automatic
 
 targets:
@@ -25,6 +25,8 @@ targets:
       - path: ViePNApp/Views/Lunar/HeritageCalendarView.swift
       - path: Shared/Lunar/HeritageData.swift
       - path: Shared/Lunar/SolarTermGuide.swift
+      - path: Shared/Lunar/ZodiacKnowledge.swift
+      - path: ViePNApp/Views/Lunar/ZodiacArticleView.swift
       - path: ViePNApp/Views/Lunar/SolarTermLibraryView.swift
       - path: ViePNApp/Stores/LunarFamilyStore.swift
       - path: ViePNApp/Views/Lunar/ThienNienHomeView.swift
