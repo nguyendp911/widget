@@ -17,156 +17,88 @@ struct ThienNienLunarBoard: View {
     private let gold = Color(hex: "#C39B54")
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 19) {
             Button { onOpen(.date) } label: {
                 HeritageDayHero(day: civil, lunar: lunar, facts: facts, appearance: appearance)
             }.buttonStyle(.plain)
-
-            Divider().overlay(gold.opacity(0.7))
-
-            detailButton(.canChi, title: "THIÊN CAN · ĐỊA CHI",
-                         value: "Ngày \(facts.canChiDay) · Tháng \(facts.canChiMonth) · Năm \(facts.canChiYear)",
-                         icon: "ViePNIconCanChi")
-            detailButton(.zodiac, title: "TỬ VI DÂN GIAN",
-                         value: "\(facts.canChiDay) · \(facts.dayAnimalName) · Xem hồ sơ tuổi",
-                         icon: "ViePNIconZodiac")
-            detailButton(.auspicious, title: "SAO · TRỰC · NGÀY TỐT XẤU",
-                         value: "\(facts.dayKind) · \(facts.spirit) · Trực \(facts.officer)",
-                         icon: "ViePNIconSpirit")
-            detailButton(.hours, title: "GIỜ HOÀNG ĐẠO",
-                         value: facts.goodHoursLabel, icon: "ViePNIconGoodHours")
-            detailButton(.solarTerms, title: "24 TIẾT KHÍ",
-                         value: facts.solarTerm + (SolarTermGuide.named(facts.solarTerm).map { " · " + $0.season } ?? ""), icon: "ViePNIconSolarTerm")
-            detailButton(.memorials, title: "NGÀY GIỖ · GIA ĐÌNH",
-                         value: familySummary, icon: "ViePNIconMemorial")
-            detailButton(.observances, title: "MÙNG 1 · RẰM · NGÀY LỄ",
-                         value: observanceSummary, icon: "ViePNIconMoon")
-
+            EditorialSectionTitle(eyebrow: "Tra cứu trong ngày", title: "Nhịp sống & lịch pháp")
+            termCard
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
+                tile(.canChi, title: "Thiên Can · Địa Chi", value: facts.canChiDay, note: "Tháng " + facts.canChiMonth + " · Năm " + facts.canChiYear, symbol: "circle.hexagongrid")
+                tile(.auspicious, title: "Sao & Trực", value: "Trực " + facts.officer, note: facts.dayKind + " · " + facts.spirit, symbol: "sparkle")
+                tile(.zodiac, title: "Con giáp", value: facts.dayAnimalName, note: "Tuổi xung: " + facts.opposingAnimalName, symbol: "seal")
+                tile(.hours, title: "Giờ hoàng đạo", value: String(facts.goodHours.count) + " khung giờ", note: facts.goodHoursLabel, symbol: "clock")
+            }
             VStack(alignment: .leading, spacing: 13) {
                 Button { onOpen(.month) } label: {
-                    HStack(spacing: 9) {
-                        Image("ViePNIconCalendar").resizable().scaledToFit().frame(width: 30, height: 30)
-                        Text("LỊCH THÁNG ÂM DƯƠNG")
-                            .font(.system(size: 16, weight: .semibold, design: .serif))
-                            .foregroundStyle(wine)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("ÂM DƯƠNG LỊCH").font(.caption2.weight(.semibold)).tracking(1.5).foregroundStyle(soft)
+                            Text("Tháng " + String(civil.month) + " · " + String(civil.year)).font(.system(.title2, design: .serif).weight(.semibold))
+                        }
                         Spacer()
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                            .font(.caption).foregroundStyle(gold)
-                    }
-                }
-                .buttonStyle(.plain)
+                        Image(systemName: "arrow.up.right").font(.subheadline.weight(.semibold)).foregroundStyle(wine)
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                }.buttonStyle(.plain)
                 monthGrid
-            }
-            .padding(14)
-            .background(Color(hex: "#FFF9E9").opacity(0.96), in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(gold.opacity(0.42), lineWidth: 0.8))
-            Text("Âm lịch Việt Nam (UTC+7) · Can Chi, ngày tốt–xấu và tử vi dân gian là thông tin văn hóa tham khảo.")
-                .font(.system(size: 11))
-                .foregroundStyle(soft)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(16)
-        .background {
-            GeometryReader { geometry in
-                ZStack {
-                    Color(hex: "#F3E2C4")
-                    if let asset = appearance.artwork.resolvedResource(theme: appearance.theme, family: "Large") {
-                    Image(asset)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                        .opacity(0.16)
-                    }
-                    Color(hex: "#FFF5DF").opacity(0.26)
+                HStack(spacing: 7) {
+                    Circle().fill(gold).frame(width: 6,height: 6)
+                    Text("Mùng 1, Rằm").font(.caption).foregroundStyle(soft)
+                    Spacer()
+                    Text("Chạm ngày để tra cứu").font(.caption).foregroundStyle(soft)
                 }
-            }
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .strokeBorder(gold, lineWidth: 2)
-                .padding(2)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(Color(hex: "#F6DCA5"), lineWidth: 1)
-                .padding(6)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 25))
+            }.padding(16).editorialSurface()
+            EditorialSectionTitle(eyebrow: "Nếp nhà Việt", title: "Ngày đáng nhớ")
+            tile(.observances, title: "Mùng 1 · Rằm · Ngày lễ", value: "Lịch lễ Việt", note: observanceSummary, symbol: "moon.stars")
+            tile(.memorials, title: "Gia đình", value: "Ngày giỗ & ngày nhớ", note: familySummary, symbol: "heart")
+            Text("Lịch tính theo UTC+7; quan niệm giờ, ngày tốt xấu và tử vi là thông tin văn hóa tham khảo.").font(.caption).foregroundStyle(soft)
+        }.foregroundStyle(ink)
     }
 
-    private var banner: some View {
-        HStack(spacing: 11) {
-            Image("ViePNIconCulture")
-                .resizable().scaledToFit().frame(width: 45, height: 45)
-            VStack(alignment: .leading, spacing: 3) {
-                Text("THIÊN NIÊN VIỆT")
-                    .font(.system(size: 25, weight: .bold, design: .serif))
-                    .tracking(0.6)
-                    .foregroundStyle(wine)
-                    .minimumScaleFactor(0.8)
-                    .lineLimit(1)
-                Text("LỊCH VẠN NIÊN · GIỮ NGÀY VIỆT")
-                    .font(.system(size: 10, weight: .medium, design: .serif))
-                    .tracking(0.5)
-                    .foregroundStyle(soft)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.bottom, 3)
+    private var termCard: some View {
+        let guide = SolarTermGuide.named(facts.solarTerm)
+        let period = SolarTermGuide.period(on: civil)
+        return Button { onOpen(.solarTerms) } label: {
+            HStack(alignment: .center, spacing: 15) {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("24 TIẾT KHÍ  /  " + (guide?.season.uppercased() ?? ""))
+                        .font(.caption2.weight(.semibold)).tracking(1.4).foregroundStyle(Color(hex: "#E6C17B"))
+                    Text(facts.solarTerm).font(.system(size: 29,weight:.semibold,design:.serif))
+                    Text(guide?.meaning ?? "Tra cứu tiết khí").font(.subheadline).fixedSize(horizontal:false,vertical:true)
+                    if let next = period.next {
+                        let days = VietnameseLunarCalendar.jdn(next) - VietnameseLunarCalendar.jdn(civil)
+                        Text("Còn " + String(days) + " ngày đến " + VietnameseLunarCalendar.solarTerm(on: next).name)
+                            .font(.caption.weight(.medium)).foregroundStyle(Color(hex: "#E6C17B"))
+                    }
+                }.frame(maxWidth: .infinity,alignment:.leading)
+                VStack(spacing: 11) {
+                    Image(systemName: guide?.symbol ?? "sun.max").font(.system(size: 39, weight: .light))
+                    Image(systemName: "arrow.up.right").font(.caption.weight(.semibold))
+                }.foregroundStyle(Color(hex: "#E6C17B"))
+            }.padding(19).foregroundStyle(Color(hex: "#FFF1D3"))
+            .background(LinearGradient(colors:[Color(hex:"#173D36"),Color(hex:"#285B4D")],startPoint:.topLeading,endPoint:.bottomTrailing),in:RoundedRectangle(cornerRadius:22))
+        }.buttonStyle(.plain)
     }
 
-    private func detailButton(_ section: ThienNienSection, title: String,
-                              value: String, icon: String) -> some View {
+    private func tile(_ section: ThienNienSection, title: String, value: String, note: String, symbol: String) -> some View {
         Button { onOpen(section) } label: {
-            HStack(alignment: .center, spacing: 10) {
-                if section == .zodiac {
-                    HeritageAnimalArtwork(branch: facts.dayAnimal).frame(width: 54, height: 54)
-                } else {
-                    Image(icon).resizable().scaledToFit().frame(width: 37, height: 37)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .bold, design: .serif))
-                        .foregroundStyle(wine)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(value)
-                        .font(.system(size: 14, weight: .medium, design: .serif))
-                        .foregroundStyle(ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 2)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(gold)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 11)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                ZStack(alignment: .trailing) {
-                    Color(hex: "#FFFBF0")
-                    if appearance.showOrnament {
-                        Image(ornament(section)).resizable().scaledToFit().frame(width: 83).opacity(0.26)
+            VStack(alignment:.leading,spacing:8) {
+                HStack {
+                    if section == .zodiac {
+                        HeritageAnimalArtwork(branch: facts.dayAnimal).frame(width:42,height:42)
+                    } else {
+                        Image(systemName:symbol).font(.system(size:21,weight:.medium)).foregroundStyle(wine)
+                            .frame(width:42,height:42)
+                            .background(Color(hex:"#F3E8D5"),in:RoundedRectangle(cornerRadius:13))
                     }
-                }.clipShape(RoundedRectangle(cornerRadius: 13))
-            }
-            .overlay(RoundedRectangle(cornerRadius: 13).stroke(gold, lineWidth: 1))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(gold.opacity(0.3), lineWidth: 0.5).padding(3))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Xem chi tiết \(section.title)")
-    }
-
-    private func ornament(_ section: ThienNienSection) -> String {
-        switch section {
-        case .canChi: return "TNVBamboo"
-        case .zodiac: return "TNVBlossom"
-        case .hours, .auspicious, .observances: return "TNVCloud"
-        case .solarTerms: return "TNVMountain"
-        case .memorials: return "TNVLotus"
-        default: return "TNVDrum"
-        }
+                    Spacer(minLength:0)
+                    Image(systemName:"arrow.up.right").font(.caption.weight(.semibold)).foregroundStyle(soft)
+                }
+                Text(title).font(.caption.weight(.medium)).foregroundStyle(soft)
+                Text(value).font(.system(.headline,design:.serif)).foregroundStyle(ink).fixedSize(horizontal:false,vertical:true)
+                Text(note).font(.caption).foregroundStyle(soft).fixedSize(horizontal:false,vertical:true)
+            }.padding(13).frame(maxWidth:.infinity,minHeight:145,alignment:.topLeading).editorialSurface()
+        }.buttonStyle(.plain).accessibilityLabel("Xem " + title + ": " + value + ". " + note)
     }
 
     private var familySummary: String {
@@ -201,17 +133,17 @@ struct ThienNienLunarBoard: View {
                 ForEach(0..<42, id: \.self) { index in
                     let day = VietnameseLunarCalendar.civilDate(start - offset + index)
                     let moon = VietnameseLunarCalendar.solarToLunar(day)
-                    Button { onSelect(day) } label: {
+                    Button { if VietnameseLunarCalendar.isValid(day) { onSelect(day) } } label: {
                         VStack(spacing: 3) {
                             Text("\(day.day)")
                                 .font(.system(size: 13, weight: day == civil ? .bold : .medium))
-                                .foregroundStyle(day.month == civil.month ? ink : soft.opacity(0.48))
+                                .foregroundStyle(day == civil ? Color.white : day.month == civil.month ? ink : soft.opacity(0.48))
                             Text(moon?.day == 1 ? "1/\(moon?.month ?? 0)" : "\(moon?.day ?? 0)")
                                 .font(.system(size: 10))
-                                .foregroundStyle(moon?.day == 1 || moon?.day == 15 ? wine : soft)
+                                .foregroundStyle(day == civil ? Color(hex: "#FFE5AE") : moon?.day == 1 || moon?.day == 15 ? wine : soft)
                         }
                         .frame(maxWidth: .infinity, minHeight: 39)
-                        .background(day == civil ? gold.opacity(0.22) : .clear,
+                        .background(day == civil ? wine : .clear,
                                     in: RoundedRectangle(cornerRadius: 7))
                     }
                     .buttonStyle(.plain)

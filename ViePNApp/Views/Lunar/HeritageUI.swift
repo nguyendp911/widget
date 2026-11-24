@@ -1,10 +1,10 @@
 import SwiftUI
 
 enum HeritagePalette {
-    static let paper = Color(hex: "#F7E9D2")
-    static let ink = Color(hex: "#512D22")
-    static let red = Color(hex: "#9D181C")
-    static let gold = Color(hex: "#C89438")
+    static let paper = Color(hex: "#F6F0E5")
+    static let ink = Color(hex: "#332923")
+    static let red = Color(hex: "#84262B")
+    static let gold = Color(hex: "#B68B49")
     static let soft = Color(hex: "#80664C")
 }
 
@@ -49,55 +49,106 @@ struct HeritageBanner: View {
     }
 }
 
+/// Editorial calendar card: one dominant date, a lunar seal, and clear calendar context.
 struct HeritageDayHero: View {
     let day: SolarCivilDate
     let lunar: VietnameseLunarDate?
     let facts: LunarAlmanacFacts
     let appearance: LunarAppearance
-    var body: some View {
-        ZStack {
-            LinearGradient(colors: [Color(hex: "#6F0C12"), Color(hex: "#B62123"), Color(hex: "#7E1114")], startPoint: .topLeading, endPoint: .bottomTrailing)
-            if appearance.showOrnament {
-                HeritageDrumMark(tint: Color(hex: "#EAC67A")).frame(width: 215, height: 215).opacity(0.22).accessibilityHidden(true)
-                VStack {
-                    HStack {
-                        Image("TNVBlossom").resizable().scaledToFit().frame(width: 100)
-                        Spacer()
-                        Image("TNVCloud").resizable().scaledToFit().frame(width: 66)
-                    }
-                    Spacer()
-                    HStack(alignment: .bottom) {
-                        Image("TNVMountain").resizable().scaledToFit().frame(width: 115)
-                        Spacer()
-                        Image("TNVLotus").resizable().scaledToFit().frame(width: 88)
-                    }
-                }.accessibilityHidden(true)
-            }
-            VStack(spacing: 9) {
-                HStack(spacing: 0) {
-                    dateColumn("DƯƠNG LỊCH", String(day.day), "Tháng \(day.month), \(String(day.year))")
-                    Rectangle().fill(Color(hex: "#EAC67A").opacity(0.75)).frame(width: 1, height: 91)
-                    dateColumn("ÂM LỊCH", lunar.map { String($0.day) } ?? "—", lunar.map { "Tháng \($0.month)\($0.isLeapMonth ? " nhuận" : "")" } ?? "Ngoài phạm vi")
-                }
-                Text("\(facts.canChiDay) · \(facts.dayKind)")
-                    .font(.system(size: 13, weight: .medium, design: .serif))
-                    .padding(.horizontal, 11).padding(.vertical, 6)
-                    .background(Color(hex: "#630D13").opacity(0.9), in: Capsule())
-            }.padding(.vertical, 17).padding(.horizontal, 16)
-        }
-        .frame(minHeight: 178)
-        .foregroundStyle(Color(hex: "#FFF0C7"))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color(hex: "#DCA94B"), lineWidth: 2))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color(hex: "#FFE3A0"), lineWidth: 0.7).padding(5))
+    private let cream = Color(hex: "#FFF0D2")
+    private let brass = Color(hex: "#E6C17B")
+
+    private var weekday: String {
+        guard let date = day.asDate() else { return "" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "vi_VN")
+        formatter.timeZone = VietnameseLunarCalendar.vietnamTimeZone
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: date).capitalized
     }
 
-    private func dateColumn(_ title: String, _ number: String, _ footer: String) -> some View {
-        VStack(spacing: 3) {
-            Text(title).font(.system(size: 10, weight: .semibold)).tracking(1)
-            Text(number).font(.system(size: 57, weight: .medium, design: .serif)).monospacedDigit()
-            Text(footer).font(.system(size: 12, weight: .medium, design: .serif)).lineLimit(2)
-        }.frame(maxWidth: .infinity)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 17) {
+            HStack(alignment: .center) {
+                Label("LỊCH VIỆT", systemImage: "sun.max").font(.caption.weight(.semibold)).tracking(2)
+                Spacer()
+                Text(weekday).font(.subheadline.weight(.medium))
+            }.foregroundStyle(brass)
+            HStack(alignment: .center, spacing: 18) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("DƯƠNG LỊCH").font(.caption2.weight(.semibold)).tracking(1.3).foregroundStyle(brass)
+                    Text(String(day.day)).font(.system(size: 84, weight: .regular, design: .serif)).monospacedDigit()
+                        .lineLimit(1).minimumScaleFactor(0.5).contentTransition(.numericText())
+                    Text("Tháng " + String(day.month) + " · " + String(day.year))
+                        .font(.subheadline.weight(.medium)).foregroundStyle(brass)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                VStack(spacing: 6) {
+                    ZStack {
+                        Circle().fill(Color(hex: "#F0D49A"))
+                        Circle().strokeBorder(brass, lineWidth: 1.5).padding(5)
+                        if appearance.showOrnament {
+                            HeritageDrumMark(tint: Color(hex: "#9C6329")).padding(9).opacity(0.35)
+                        }
+                        VStack(spacing: 0) {
+                            Text(lunar.map { String($0.day) } ?? "—")
+                                .font(.system(size: 43, weight: .semibold, design: .serif)).monospacedDigit()
+                            Text("ÂM LỊCH").font(.system(size: 9, weight: .semibold)).tracking(1)
+                        }.foregroundStyle(Color(hex: "#621B20"))
+                    }.frame(width: 111, height: 111)
+                    Text(lunar.map { "Tháng " + String($0.month) + ($0.isLeapMonth ? " nhuận" : "") } ?? "Ngoài phạm vi")
+                        .font(.caption.weight(.medium)).foregroundStyle(brass)
+                }
+            }
+            Rectangle().fill(brass.opacity(0.35)).frame(height: 1)
+            HStack(alignment: .center, spacing: 10) {
+                HeritageAnimalArtwork(branch: facts.dayAnimal).frame(width: 43, height: 43)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(facts.canChiDay).font(.system(.headline, design: .serif))
+                    Text("Năm " + facts.canChiYear).font(.caption).foregroundStyle(brass)
+                }
+                Spacer(minLength: 5)
+                Text(facts.dayKind)
+                    .font(.caption.weight(.semibold)).foregroundStyle(cream)
+                    .padding(.horizontal, 10).padding(.vertical, 7)
+                    .background(Color.white.opacity(0.10), in: Capsule())
+                    .overlay(Capsule().strokeBorder(brass.opacity(0.55), lineWidth: 0.7))
+            }
+        }.padding(22)
+        .foregroundStyle(cream)
+        .background {
+            ZStack(alignment: .trailing) {
+                LinearGradient(colors: [Color(hex: "#381318"), Color(hex: "#70232B"), Color(hex: "#4A161F")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                if appearance.showOrnament {
+                    HeritageDrumMark(tint: brass).frame(width: 260, height: 260).offset(x: 85, y: -62).opacity(0.13).accessibilityHidden(true)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 26))
+        .overlay(RoundedRectangle(cornerRadius: 26).strokeBorder(brass.opacity(0.7), lineWidth: 1))
+    }
+}
+
+/// Quiet paper card for reading and interaction, without repeated ornamental borders.
+struct EditorialSurface: ViewModifier {
+    var radius: CGFloat = 20
+    func body(content: Content) -> some View {
+        content
+            .background(Color(hex: "#FFFDF7"), in: RoundedRectangle(cornerRadius: radius))
+            .overlay(RoundedRectangle(cornerRadius: radius).strokeBorder(Color(hex: "#DDCDB1"), lineWidth: 0.8))
+    }
+}
+extension View {
+    func editorialSurface(radius: CGFloat = 20) -> some View { modifier(EditorialSurface(radius: radius)) }
+}
+
+struct EditorialSectionTitle: View {
+    let eyebrow: String
+    let title: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(eyebrow.uppercased()).font(.caption2.weight(.semibold)).tracking(2).foregroundStyle(HeritagePalette.soft)
+            Text(title).font(.system(size: 25, weight: .semibold, design: .serif)).foregroundStyle(HeritagePalette.ink)
+        }.frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

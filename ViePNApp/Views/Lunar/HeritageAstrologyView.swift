@@ -81,81 +81,126 @@ struct HeritageAstrologyView: View {
     @State private var date = Date()
     @State private var selectedSign: WesternSign?
     @State private var selectedAnimal: AnimalGuide?
+    @State private var category = 0
+    @State private var query = ""
     private var civil: SolarCivilDate { SolarCivilDate(date: date) ?? SolarCivilDate(year: 2026, month: 11, day: 24) }
     private var facts: LunarAlmanacFacts { LunarAlmanacFacts(civil) }
     private var sign: WesternSign { WesternSign.approximate(civil) }
+    private func matches(_ text: String) -> Bool {
+        query.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty ||
+        text.folding(options:[.caseInsensitive,.diacriticInsensitive],locale:Locale(identifier:"vi_VN"))
+            .contains(query.trimmingCharacters(in:.whitespacesAndNewlines).folding(options:[.caseInsensitive,.diacriticInsensitive],locale:Locale(identifier:"vi_VN")))
+    }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                HeritageBanner(title: "Thiên mệnh", subtitle: "Can Chi · Con giáp · Hoàng đạo")
+            VStack(alignment:.leading,spacing:20) {
+                EditorialSectionTitle(eyebrow:"Thư viện văn hóa",title:"Thiên mệnh")
+                profile
                 if !HeritageArtCatalog.missingAssets.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label("Bản cài đặt thiếu ảnh", systemImage: "exclamationmark.triangle.fill").font(.headline)
-                        Text("Thiếu " + String(HeritageArtCatalog.missingAssets.count) + "/24 asset. Hãy cập nhật IPA mới; ứng dụng không dùng hình cũ để thay thế.").font(.caption)
-                    }.padding(12).frame(maxWidth: .infinity, alignment: .leading).heritageFrame()
+                    Label("Thiếu " + String(HeritageArtCatalog.missingAssets.count) + "/24 ảnh trong bản cài đặt.", systemImage:"exclamationmark.triangle").font(.caption).foregroundStyle(HeritagePalette.red)
                 }
-                DatePicker("Ngày sinh / ngày tra cứu", selection: $date, in: (SolarCivilDate(year: 1900, month: 1, day: 1).asDate()!)...(SolarCivilDate(year: 2100, month: 12, day: 31).asDate()!), displayedComponents: .date)
-                    .environment(\.timeZone, VietnameseLunarCalendar.vietnamTimeZone)
-                    .environment(\.locale, Locale(identifier: "vi_VN"))
-                    .padding(12).heritageFrame()
-                HStack(spacing: 12) {
-                    Button { selectedAnimal = AnimalGuide.named(facts.yearAnimal) } label: {
-                        VStack(spacing: 6) {
-                            HeritageAnimalArtwork(branch: facts.yearAnimal).frame(height: 124)
-                            Text(facts.canChiYear).font(.system(.headline, design: .serif))
-                            Text(NapAmGuide.lookup(facts.canChiYear)?.name ?? facts.yearAnimalName).font(.caption)
-                            Text("Xem hồ sơ tuổi").font(.caption2).foregroundStyle(HeritagePalette.red)
-                        }.frame(maxWidth: .infinity).padding(10).heritageFrame()
-                    }.buttonStyle(.plain)
-                    Button { selectedSign = sign } label: {
-                        VStack(spacing: 6) {
-                            WesternArtwork(sign: sign).frame(height: 124)
-                            Text(sign.name).font(.system(.headline, design: .serif))
-                            Text(sign.element).font(.caption)
-                            Text("Xem hồ sơ cung").font(.caption2).foregroundStyle(HeritagePalette.red)
-                        }.frame(maxWidth: .infinity).padding(10).heritageFrame()
-                    }.buttonStyle(.plain)
-                }
-                HeritagePlaque(title: "Mười hai con giáp Việt")
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 10) {
-                    ForEach(AnimalGuide.all) { guide in
-                        Button { selectedAnimal = guide } label: {
-                            VStack(spacing: 7) {
-                                HeritageAnimalArtwork(branch: guide.branch).frame(height: 98)
-                                Text(guide.branch + " · " + guide.animal).font(.subheadline.weight(.semibold))
-                                Text(guide.yinYang + " " + guide.element).font(.caption).foregroundStyle(HeritagePalette.soft)
-                                Text("Xem hồ sơ").font(.caption2).foregroundStyle(HeritagePalette.red)
-                            }.frame(maxWidth: .infinity).padding(7).heritageFrame()
-                        }.buttonStyle(.plain)
+                EditorialSectionTitle(eyebrow:"Khám phá",title:"Hồ sơ biểu tượng")
+                Picker("Thư viện",selection:$category) {
+                    Text("Con giáp Việt").tag(0)
+                    Text("Hoàng đạo").tag(1)
+                }.pickerStyle(.segmented)
+                HStack {
+                    Image(systemName:"magnifyingglass").foregroundStyle(HeritagePalette.soft)
+                    TextField("Tìm theo tên, ngũ hành hoặc nguyên tố",text:$query)
+                        .autocorrectionDisabled()
+                    if !query.isEmpty {
+                        Button { query = "" } label: { Image(systemName:"xmark.circle.fill") }.accessibilityLabel("Xóa tìm kiếm")
+                    }
+                }.padding(12).editorialSurface(radius:14)
+                if category == 0 {
+                    let animals = AnimalGuide.all.filter { matches($0.branch + " " + $0.animal + " " + $0.element) }
+                    if animals.isEmpty { Text("Không tìm thấy con giáp phù hợp.").font(.subheadline).foregroundStyle(HeritagePalette.soft) }
+                    LazyVGrid(columns:[GridItem(.flexible(),spacing:12),GridItem(.flexible(),spacing:12)],spacing:12) {
+                        ForEach(animals) { guide in
+                            Button { selectedAnimal = guide } label: {
+                                galleryTile(title:guide.branch + " · " + guide.animal, subtitle:guide.yinYang + " " + guide.element, index:String(format:"%02d",guide.index+1)) {
+                                    HeritageAnimalArtwork(branch:guide.branch)
+                                }
+                            }.buttonStyle(.plain)
+                        }
+                    }
+                } else {
+                    let signs = WesternSign.allCases.filter { matches($0.name + " " + $0.rawValue + " " + $0.element) }
+                    if signs.isEmpty { Text("Không tìm thấy cung phù hợp.").font(.subheadline).foregroundStyle(HeritagePalette.soft) }
+                    LazyVGrid(columns:[GridItem(.flexible(),spacing:12),GridItem(.flexible(),spacing:12)],spacing:12) {
+                        ForEach(signs) { item in
+                            Button { selectedSign = item } label: {
+                                galleryTile(title:item.name,subtitle:item.element + " · " + item.period,index:item.symbol) {
+                                    WesternArtwork(sign:item)
+                                }
+                            }.buttonStyle(.plain)
+                        }
                     }
                 }
-                HeritagePlaque(title: "Mười hai cung hoàng đạo", jade: true)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 10) {
-                    ForEach(WesternSign.allCases) { item in
-                        Button { selectedSign = item } label: {
-                            VStack(spacing: 5) {
-                                WesternArtwork(sign: item).frame(height: 98)
-                                Text(item.name).font(.caption.weight(.semibold))
-                                Text(item.element).font(.caption2).foregroundStyle(HeritagePalette.soft)
-                                Text("Xem hồ sơ").font(.caption2).foregroundStyle(HeritagePalette.red)
-                            }.frame(maxWidth: .infinity).padding(6).heritageFrame()
-                        }.buttonStyle(.plain)
-                    }
-                }
-                Text("Bộ minh họa · 3.8").font(.caption2).foregroundStyle(HeritagePalette.soft)
-                Text("Cung Mặt Trời được ước tính bằng mốc ngày phổ biến. Ngày sát ranh giới cần giờ, nơi sinh và thiên văn chính xác. Tử vi, chiêm tinh là nội dung văn hóa, không có khả năng dự báo chắc chắn.").font(.caption).foregroundStyle(HeritagePalette.soft)
+                Text("Con giáp theo năm âm lịch. Cung Mặt Trời là ước tính theo ngày; chiêm tinh và tử vi là văn hóa tham khảo.").font(.caption).foregroundStyle(HeritagePalette.soft)
             }.padding(16)
         }
         .background(HeritagePalette.paper.ignoresSafeArea())
         .foregroundStyle(HeritagePalette.ink)
         .navigationTitle("Thiên mệnh")
         .navigationBarTitleDisplayMode(.inline)
-        .fullScreenCover(item: $selectedSign) { item in
-            WesternSignArticleView(sign: item)
-        }
-        .fullScreenCover(item: $selectedAnimal) { item in
-            ZodiacArticleView(guide: item, referenceYear: civil.year)
-        }
+        .fullScreenCover(item:$selectedSign) { WesternSignArticleView(sign:$0) }
+        .fullScreenCover(item:$selectedAnimal) { ZodiacArticleView(guide:$0,referenceYear:civil.year) }
+        .onChange(of:category) { _,_ in query = "" }
+    }
+
+    private var profile: some View {
+        VStack(alignment:.leading,spacing:16) {
+            HStack {
+                VStack(alignment:.leading,spacing:5) {
+                    Text("TRA CỨU THEO NGÀY SINH").font(.caption2.weight(.semibold)).tracking(1.2)
+                    Text("Dấu ấn của bạn").font(.system(.title2,design:.serif).weight(.semibold))
+                }
+                Spacer()
+                Image(systemName:"calendar").font(.title2)
+            }.foregroundStyle(Color(hex:"#E7C583"))
+            DatePicker("Ngày sinh",selection:$date,in:SolarCivilDate(year:1900,month:1,day:1).asDate()!...SolarCivilDate(year:2100,month:12,day:31).asDate()!,displayedComponents:.date)
+                .environment(\.timeZone,VietnameseLunarCalendar.vietnamTimeZone)
+                .environment(\.locale,Locale(identifier:"vi_VN"))
+                .padding(9).background(Color(hex:"#FFF5DE"),in:RoundedRectangle(cornerRadius:12))
+                .foregroundStyle(HeritagePalette.ink)
+            HStack(alignment:.top,spacing:13) {
+                Button { selectedAnimal = AnimalGuide.named(facts.yearAnimal) } label: {
+                    VStack(spacing:8) {
+                        HeritageAnimalArtwork(branch:facts.yearAnimal).frame(height:120)
+                        Text(facts.canChiYear).font(.system(.headline,design:.serif))
+                        Text(NapAmGuide.lookup(facts.canChiYear)?.name ?? facts.yearAnimalName).font(.caption)
+                        Label("Hồ sơ tuổi",systemImage:"arrow.up.right").font(.caption2.weight(.medium)).foregroundStyle(Color(hex:"#E7C583"))
+                    }.frame(maxWidth:.infinity)
+                }.buttonStyle(.plain)
+                Rectangle().fill(Color(hex:"#E7C583").opacity(0.28)).frame(width:1,height:166)
+                Button { selectedSign = sign } label: {
+                    VStack(spacing:8) {
+                        WesternArtwork(sign:sign).frame(height:120)
+                        Text(sign.name).font(.system(.headline,design:.serif))
+                        Text("Nguyên tố " + sign.element).font(.caption)
+                        Label("Hồ sơ cung",systemImage:"arrow.up.right").font(.caption2.weight(.medium)).foregroundStyle(Color(hex:"#E7C583"))
+                    }.frame(maxWidth:.infinity)
+                }.buttonStyle(.plain)
+            }
+        }.padding(18).foregroundStyle(Color(hex:"#FFF0D2"))
+        .background(LinearGradient(colors:[Color(hex:"#3F141B"),Color(hex:"#782B30")],startPoint:.topLeading,endPoint:.bottomTrailing),in:RoundedRectangle(cornerRadius:24))
+    }
+
+    private func galleryTile<Artwork:View>(title:String,subtitle:String,index:String,@ViewBuilder artwork:()->Artwork) -> some View {
+        VStack(alignment:.leading,spacing:8) {
+            ZStack(alignment:.topLeading) {
+                Color(hex:"#EFE4D1")
+                artwork().padding(13).frame(maxWidth:.infinity,maxHeight:.infinity)
+                Text(index).font(.caption2.weight(.semibold)).foregroundStyle(HeritagePalette.soft).padding(10)
+            }.frame(height:145).clipShape(RoundedRectangle(cornerRadius:15))
+            HStack(alignment:.firstTextBaseline) {
+                Text(title).font(.system(.headline,design:.serif)).fixedSize(horizontal:false,vertical:true)
+                Spacer(minLength:0)
+                Image(systemName:"arrow.up.right").font(.caption).foregroundStyle(HeritagePalette.red)
+            }
+            Text(subtitle).font(.caption).foregroundStyle(HeritagePalette.soft).fixedSize(horizontal:false,vertical:true)
+        }.padding(9).frame(maxWidth:.infinity,alignment:.topLeading).editorialSurface(radius:20)
     }
 }

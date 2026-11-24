@@ -43,9 +43,9 @@ struct ThienNienHomeView: View {
             .padding(.horizontal, 16)
             .padding(.top, 15)
         }
-        .background(Color(hex: "#F1E5CE").ignoresSafeArea())
+        .background(HeritagePalette.paper.ignoresSafeArea())
         .foregroundStyle(ink)
-        .navigationTitle("Thiên Niên Việt")
+        .navigationTitle("Hôm nay")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -78,7 +78,15 @@ struct ThienNienHomeView: View {
     }
 
     private var header: some View {
-        HeritageBanner(title: "Thiên Niên Việt", subtitle: "Lịch âm & Văn hóa Việt")
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("LỊCH ÂM  /  VĂN HÓA VIỆT").font(.caption2.weight(.semibold)).tracking(2).foregroundStyle(soft)
+                Text("Thiên Niên Việt").font(.system(size: 32, weight: .semibold, design: .serif))
+                Text("Giữ ngày Việt · Trọn tình thân").font(.subheadline).foregroundStyle(soft)
+            }
+            Spacer(minLength: 0)
+            HeritageDrumMark(tint: gold).frame(width: 51, height: 51).accessibilityHidden(true)
+        }.padding(.vertical, 3)
     }
 
     private var dateNavigator: some View {
@@ -91,8 +99,9 @@ struct ThienNienHomeView: View {
                 "Ngày đang xem",
                 selection: Binding(
                     get: { selected.asDate(hour: 12) ?? Date() },
-                    set: { if let day = SolarCivilDate(date: $0) { selected = day } }
+                    set: { if let day = SolarCivilDate(date: $0), VietnameseLunarCalendar.isValid(day) { selected = day } }
                 ),
+                in: SolarCivilDate(year: 1900, month: 1, day: 1).asDate(hour: 12)!...SolarCivilDate(year: 2100, month: 12, day: 31).asDate(hour: 12)!,
                 displayedComponents: .date
             )
             .environment(\.timeZone, VietnameseLunarCalendar.vietnamTimeZone)
