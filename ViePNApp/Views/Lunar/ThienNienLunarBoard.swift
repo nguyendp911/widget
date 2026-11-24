@@ -28,7 +28,7 @@ struct ThienNienLunarBoard: View {
                          value: "Ngày \(facts.canChiDay) · Tháng \(facts.canChiMonth) · Năm \(facts.canChiYear)",
                          icon: "ViePNIconCanChi")
             detailButton(.zodiac, title: "TỬ VI DÂN GIAN",
-                         value: "Con \(facts.dayAnimalName) · Xung \(facts.opposingAnimalName)",
+                         value: "\(facts.canChiDay) · \(facts.dayAnimalName) · Xem hồ sơ tuổi",
                          icon: "ViePNIconZodiac")
             detailButton(.auspicious, title: "SAO · TRỰC · NGÀY TỐT XẤU",
                          value: "\(facts.dayKind) · \(facts.spirit) · Trực \(facts.officer)",
@@ -36,7 +36,7 @@ struct ThienNienLunarBoard: View {
             detailButton(.hours, title: "GIỜ HOÀNG ĐẠO",
                          value: facts.goodHoursLabel, icon: "ViePNIconGoodHours")
             detailButton(.solarTerms, title: "24 TIẾT KHÍ",
-                         value: facts.solarTerm, icon: "ViePNIconSolarTerm")
+                         value: facts.solarTerm + (SolarTermGuide.named(facts.solarTerm).map { " · " + $0.season } ?? ""), icon: "ViePNIconSolarTerm")
             detailButton(.memorials, title: "NGÀY GIỖ · GIA ĐÌNH",
                          value: familySummary, icon: "ViePNIconMemorial")
             detailButton(.observances, title: "MÙNG 1 · RẰM · NGÀY LỄ",
@@ -120,7 +120,11 @@ struct ThienNienLunarBoard: View {
                               value: String, icon: String) -> some View {
         Button { onOpen(section) } label: {
             HStack(alignment: .center, spacing: 10) {
-                Image(icon).resizable().scaledToFit().frame(width: 37, height: 37)
+                if section == .zodiac {
+                    HeritageAnimalArtwork(branch: facts.dayAnimal).frame(width: 54, height: 54)
+                } else {
+                    Image(icon).resizable().scaledToFit().frame(width: 37, height: 37)
+                }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 13, weight: .bold, design: .serif))
