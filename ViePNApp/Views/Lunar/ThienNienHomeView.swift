@@ -56,16 +56,16 @@ struct ThienNienHomeView: View {
                 .accessibilityLabel("Cài đặt lịch âm")
             }
         }
-        .sheet(item: $detail) { section in
+        .fullScreenCover(item: $detail) { section in
             ThienNienDetailSheet(section: section, civil: selected, familyEvents: family.events)
         }
-        .sheet(isPresented: $showingEventEditor) {
+        .fullScreenCover(isPresented: $showingEventEditor) {
             NavigationStack { LunarEventEditorView() }
         }
-        .sheet(item: $editingEvent) { event in
+        .fullScreenCover(item: $editingEvent) { event in
             NavigationStack { LunarEventEditorView(editing: event) }
         }
-        .sheet(isPresented: $showingSettings) {
+        .fullScreenCover(isPresented: $showingSettings) {
             NavigationStack { ThienNienSettingsView() }
         }
         .alert("Thiên Niên Việt", isPresented: Binding(
