@@ -12,6 +12,32 @@ final class LunarOnlyTests: XCTestCase {
         XCTAssertEqual(Set(VietnameseLunarCalendar.chi.map { HeritageArtCatalog.animal($0) }).count, 12)
     }
 
+    func testSolarTermLibraryCoverage() {
+        XCTAssertEqual(SolarTermGuide.all.count, 24)
+        XCTAssertEqual(Set(SolarTermGuide.all.map(\.name)), Set(VietnameseLunarCalendar.terms))
+        XCTAssertEqual(SolarTermGuide.named("Xuân phân")?.longitude, 0)
+        XCTAssertEqual(SolarTermGuide.named("Đông chí")?.longitude, 270)
+        for year in [1900, 2026, 2028, 2100] {
+            let starts = SolarTermGuide.starts(in: year)
+            XCTAssertEqual(starts.count, 24)
+            XCTAssertEqual(Set(starts.map { $0.guide.name }).count, 24)
+            XCTAssertTrue(starts.allSatisfy { VietnameseLunarCalendar.solarTerm(on: $0.date).startsToday })
+        }
+    }
+
+    func testSolarTermPeriod() {
+        let day = SolarCivilDate(year: 2026, month: 11, day: 24)
+        let period = SolarTermGuide.period(on: day)
+        XCTAssertNotNil(period.start)
+        XCTAssertNotNil(period.next)
+        if let start = period.start, let next = period.next {
+            XCTAssertLessThanOrEqual(start, day)
+            XCTAssertGreaterThan(next, day)
+            XCTAssertEqual(VietnameseLunarCalendar.solarTerm(on: start).name,
+                           VietnameseLunarCalendar.solarTerm(on: day).name)
+        }
+    }
+
     func testNaturalDateSearch() {
         let expected = VietnameseLunarCalendar.lunarToSolar(
             VietnameseLunarDate(day: 15, month: 7, year: 2028, isLeapMonth: false))
