@@ -128,11 +128,11 @@ struct HeritageFamilyView: View {
         .foregroundStyle(HeritagePalette.ink)
         .navigationTitle("Gia đình")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $addEvent) { NavigationStack { LunarEventEditorView() } }
-        .sheet(item: $editEvent) { event in NavigationStack { LunarEventEditorView(editing: event) } }
-        .sheet(item: $checklist) { item in HeritageChecklistView(event: item) }
-        .sheet(isPresented: $showPeople) { HeritagePeopleView() }
-        .sheet(isPresented: $showMemory) { HeritageMemoryView() }
+        .fullScreenCover(isPresented: $addEvent) { NavigationStack { LunarEventEditorView() } }
+        .fullScreenCover(item: $editEvent) { event in NavigationStack { LunarEventEditorView(editing: event) } }
+        .fullScreenCover(item: $checklist) { item in HeritageChecklistView(event: item) }
+        .fullScreenCover(isPresented: $showPeople) { HeritagePeopleView() }
+        .fullScreenCover(isPresented: $showMemory) { HeritageMemoryView() }
         .fileImporter(isPresented: $showImport, allowedContentTypes: [.json]) { result in
             do {
                 let url = try result.get()
@@ -230,7 +230,10 @@ struct HeritageChecklistView: View {
                 Text("Danh sách gợi ý, có thể điều chỉnh theo tập quán của gia đình.").font(.caption)
             }
             .navigationTitle(event.title)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Lưu") { heritage.tasks[event.id] = items; dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Đóng") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("Lưu") { heritage.tasks[event.id] = items; dismiss() } }
+            }
             .onAppear { items = heritage.tasks[event.id] ?? HeritageRitual.preparation(for: event.kind) }
         }
     }
