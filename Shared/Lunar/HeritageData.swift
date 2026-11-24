@@ -35,6 +35,7 @@ struct HeritageArchive: Codable {
 enum HeritageSearch {
     static func normalized(_ text: String) -> String {
         text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "vi_VN"))
+            .lowercased()
             .replacingOccurrences(of: "đ", with: "d")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }

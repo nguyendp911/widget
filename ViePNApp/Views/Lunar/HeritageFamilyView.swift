@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PhotosUI
 import UniformTypeIdentifiers
 import EventKit
@@ -54,7 +55,7 @@ struct HeritageFamilyView: View {
                         }.font(.subheadline)
                     }.padding(13).heritageFrame()
                 }
-                Text("Tất cả ngày nhớ").font(.headline)
+                HeritagePlaque(title: "Tất cả ngày nhớ")
                 ForEach(family.events) { item in
                     Button { editEvent = item } label: {
                         HStack {
@@ -70,7 +71,7 @@ struct HeritageFamilyView: View {
                     Button { showMemory = true } label: { shortcut("Kỷ niệm", image: "TNVBlossom") }
                 }.buttonStyle(.plain)
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Sao lưu và chia sẻ").font(.headline)
+                    HeritagePlaque(title: "Sao lưu và chia sẻ", jade: true)
                     Button("Tạo bản sao lưu gia đình (.json)") { makeBackup() }
                     if let backupURL { ShareLink(item: backupURL) { Label("Chia sẻ hoặc lưu vào iCloud Drive", systemImage: "square.and.arrow.up") } }
                     Button("Nhập bản sao lưu từ Tệp") { showImport = true }
@@ -95,7 +96,9 @@ struct HeritageFamilyView: View {
                 let url = try result.get()
                 let scoped = url.startAccessingSecurityScopedResource()
                 defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                let a = try JSONDecoder().decode(HeritageArchive.self, from: Data(contentsOf: url))
+                let bytes = try Data(contentsOf: url)
+                guard bytes.count <= 50_000_000 else { message = "Tệp sao lưu vượt quá 50 MB."; return }
+                let a = try JSONDecoder().decode(HeritageArchive.self, from: bytes)
                 guard a.version == 1, a.events.allSatisfy(\.isValid) else { message = "Bản sao lưu không hợp lệ."; return }
                 var added = 0
                 for event in a.events where !family.events.contains(where: { $0.id == event.id }) {

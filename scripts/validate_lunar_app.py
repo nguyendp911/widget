@@ -14,7 +14,7 @@ assert swift_app.exists() and "@main" in swift_app.read_text()
 assert len(list((root / "ViePNApp").rglob("*App.swift"))) == 1
 assert not (root / "WidgetExtension").exists()
 assets = root / "Shared/Lunar/Assets.xcassets"
-for name in ("ViePNVanNienLarge", "ViePNSenNgocLarge", "ViePNIconCulture",
+for name in ("TNVCloud", "TNVLotus", "TNVBamboo", "TNVBlossom", "TNVMountain", "TNVDrum", "TNVIncense", "TNVLacquerPlaque", "TNVJadePlaque", "TNVPaperPlaque", "ViePNVanNienLarge", "ViePNSenNgocLarge", "ViePNIconCulture",
              "ViePNIconCanChi", "ViePNIconGoodHours", "ViePNIconMemorial"):
     directory = assets / (name + ".imageset")
     data = json.loads((directory / "Contents.json").read_text())

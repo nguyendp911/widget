@@ -34,7 +34,7 @@ struct HeritageBanner: View {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
                     Image("TNVDrum").resizable().scaledToFit().frame(width: 53, height: 37)
-                    Text(title).font(.system(size: 27, weight: .bold, design: .serif)).foregroundStyle(HeritagePalette.red)
+                    Text(title).font(.system(size: 26, weight: .bold, design: .serif)).foregroundStyle(HeritagePalette.red).lineLimit(2).minimumScaleFactor(0.75)
                     Text(subtitle).font(.system(size: 12, weight: .medium)).foregroundStyle(HeritagePalette.ink)
                 }
                 Spacer(minLength: 0)
@@ -112,5 +112,25 @@ struct HeritageRootView: View {
         }
         .tint(HeritagePalette.red)
         .preferredColorScheme(.light)
+    }
+}
+
+
+struct HeritagePlaque: View {
+    let title: String
+    var jade = false
+    var body: some View {
+        ZStack {
+            Image(jade ? "TNVJadePlaque" : "TNVLacquerPlaque")
+                .resizable().scaledToFit()
+            Text(title)
+                .font(.system(size: 16, weight: .semibold, design: .serif))
+                .foregroundStyle(Color(hex: "#FFF1C9"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 47)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }

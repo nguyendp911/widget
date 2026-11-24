@@ -44,7 +44,7 @@ struct LunarEventEditorView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Nhắc trước ngày giỗ") {
-                ForEach([30, 7, 3, 1, 0], id: \.self) { days in
+                ForEach([30, 14, 7, 3, 1, 0], id: \.self) { days in
                     Toggle(days == 0 ? "Nhắc đúng ngày" : "Nhắc trước \(days) ngày", isOn: Binding(
                         get: { reminders.contains(days) },
                         set: { if $0 { reminders.insert(days) } else { reminders.remove(days) } }

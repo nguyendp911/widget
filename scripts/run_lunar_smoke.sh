@@ -9,5 +9,6 @@ swiftc -parse-as-library Shared/Lunar/VietnameseLunarCalendar.swift \
        Shared/Lunar/LunarICSExporter.swift \
        Shared/Lunar/LunarAppearance.swift \
        Shared/Lunar/LunarCulture.swift \
+       Shared/Lunar/HeritageData.swift \
        scripts/lunar/main.swift -o "$OUTPUT"
 "$OUTPUT"

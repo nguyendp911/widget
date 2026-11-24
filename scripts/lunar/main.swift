@@ -71,6 +71,15 @@ import Foundation
             assert(VietnameseLunarCalendar.lunarToSolar(lunar) == day, "solar-lunar roundtrip \(day.label)")
             days += 1
         }
+        let ram = VietnameseLunarCalendar.lunarToSolar(VietnameseLunarDate(day: 15, month: 7, year: 2028, isLeapMonth: false))
+        assert(HeritageSearch.date("Rằm tháng 7 năm 2028", year: 2026) == ram, "Vietnamese lunar query")
+        assert(HeritageSearch.date("31/2/2026", year: 2026) == nil, "invalid civil query")
+        assert(HeritageSearch.date("24/11/2026", year: 2026) == SolarCivilDate(year: 2026, month: 11, day: 24), "civil query")
+        let archive = HeritageArchive(events: [source], tasks: ["test": HeritageRitual.preparation(for: .memorial)], people: [HeritagePerson(name: "Ông", relationship: "Ông nội")], memories: [])
+        let encoded = try! JSONEncoder().encode(archive)
+        let decoded = try! JSONDecoder().decode(HeritageArchive.self, from: encoded)
+        assert(decoded.events == archive.events && decoded.tasks == archive.tasks && decoded.people == archive.people, "family backup roundtrip")
+        print("PASS: heritage search and backup")
         print("PASS: \(tet.count) Tet dates; leap month rules; 13 annual memorials; ICS; \(days) round-trips; mùng 1 / Rằm")
     }
 }
