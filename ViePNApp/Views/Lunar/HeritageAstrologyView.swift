@@ -52,7 +52,7 @@ struct HeritageAnimalArtwork: View {
     }
 }
 
-private struct WesternArtwork: View {
+struct WesternArtwork: View {
     let sign: WesternSign
     var body: some View {
         if let image = UIImage(named: sign.asset) {
@@ -70,6 +70,7 @@ private struct WesternArtwork: View {
 struct HeritageAstrologyView: View {
     @State private var date = Date()
     @State private var selectedSign: WesternSign?
+    @State private var selectedAnimal: AnimalGuide?
     private var civil: SolarCivilDate { SolarCivilDate(date: date) ?? SolarCivilDate(year: 2026, month: 11, day: 24) }
     private var facts: LunarAlmanacFacts { LunarAlmanacFacts(civil) }
     private var sign: WesternSign { WesternSign.approximate(civil) }
@@ -83,24 +84,34 @@ struct HeritageAstrologyView: View {
                     .environment(\.locale, Locale(identifier: "vi_VN"))
                     .padding(12).heritageFrame()
                 HStack(spacing: 12) {
-                    VStack(spacing: 6) {
-                        HeritageAnimalArtwork(branch: facts.yearAnimal).frame(height: 110)
-                        Text(facts.canChiYear).font(.system(.headline, design: .serif))
-                        Text(facts.yearAnimalName).font(.caption)
-                    }.frame(maxWidth: .infinity).padding(12).heritageFrame()
-                    VStack(spacing: 6) {
-                        WesternArtwork(sign: sign).frame(height: 110)
-                        Text(sign.name).font(.system(.headline, design: .serif))
-                        Text(sign.element).font(.caption)
-                    }.frame(maxWidth: .infinity).padding(12).heritageFrame()
+                    Button { selectedAnimal = AnimalGuide.named(facts.yearAnimal) } label: {
+                        VStack(spacing: 6) {
+                            HeritageAnimalArtwork(branch: facts.yearAnimal).frame(height: 124)
+                            Text(facts.canChiYear).font(.system(.headline, design: .serif))
+                            Text(NapAmGuide.lookup(facts.canChiYear)?.name ?? facts.yearAnimalName).font(.caption)
+                            Text("Xem hồ sơ tuổi").font(.caption2).foregroundStyle(HeritagePalette.red)
+                        }.frame(maxWidth: .infinity).padding(10).heritageFrame()
+                    }.buttonStyle(.plain)
+                    Button { selectedSign = sign } label: {
+                        VStack(spacing: 6) {
+                            WesternArtwork(sign: sign).frame(height: 124)
+                            Text(sign.name).font(.system(.headline, design: .serif))
+                            Text(sign.element).font(.caption)
+                            Text("Xem hồ sơ cung").font(.caption2).foregroundStyle(HeritagePalette.red)
+                        }.frame(maxWidth: .infinity).padding(10).heritageFrame()
+                    }.buttonStyle(.plain)
                 }
                 HeritagePlaque(title: "Mười hai con giáp Việt")
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 10) {
-                    ForEach(VietnameseLunarCalendar.chi, id: \.self) { branch in
-                        VStack(spacing: 5) {
-                            HeritageAnimalArtwork(branch: branch).frame(height: 86)
-                            Text(branch + " · " + LunarAlmanacFacts.animal(branch)).font(.caption.weight(.medium))
-                        }.frame(maxWidth: .infinity).padding(6).heritageFrame()
+                    ForEach(AnimalGuide.all) { guide in
+                        Button { selectedAnimal = guide } label: {
+                            VStack(spacing: 7) {
+                                HeritageAnimalArtwork(branch: guide.branch).frame(height: 98)
+                                Text(guide.branch + " · " + guide.animal).font(.subheadline.weight(.semibold))
+                                Text(guide.yinYang + " " + guide.element).font(.caption).foregroundStyle(HeritagePalette.soft)
+                                Text("Xem hồ sơ").font(.caption2).foregroundStyle(HeritagePalette.red)
+                            }.frame(maxWidth: .infinity).padding(7).heritageFrame()
+                        }.buttonStyle(.plain)
                     }
                 }
                 HeritagePlaque(title: "Mười hai cung hoàng đạo", jade: true)
@@ -108,8 +119,10 @@ struct HeritageAstrologyView: View {
                     ForEach(WesternSign.allCases) { item in
                         Button { selectedSign = item } label: {
                             VStack(spacing: 5) {
-                                WesternArtwork(sign: item).frame(height: 86)
-                                Text(item.name).font(.caption.weight(.medium))
+                                WesternArtwork(sign: item).frame(height: 98)
+                                Text(item.name).font(.caption.weight(.semibold))
+                                Text(item.element).font(.caption2).foregroundStyle(HeritagePalette.soft)
+                                Text("Xem hồ sơ").font(.caption2).foregroundStyle(HeritagePalette.red)
                             }.frame(maxWidth: .infinity).padding(6).heritageFrame()
                         }.buttonStyle(.plain)
                     }
@@ -122,20 +135,10 @@ struct HeritageAstrologyView: View {
         .navigationTitle("Thiên mệnh")
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(item: $selectedSign) { item in
-            NavigationStack {
-                ScrollView {
-                    VStack(spacing: 18) {
-                        WesternArtwork(sign: item).frame(maxWidth: 280).frame(height: 260)
-                        Text(item.symbol + " " + item.name).font(.system(.title, design: .serif).bold())
-                        Text(item.period)
-                        Text("Nguyên tố truyền thống: " + item.element)
-                        Text("Mốc ngày chỉ mang tính ước tính.").font(.caption)
-                    }.padding(24).frame(maxWidth: .infinity)
-                }
-                .background(HeritagePalette.paper.ignoresSafeArea())
-                .navigationTitle(item.name).navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Đóng") { selectedSign = nil } } }
-            }
+            WesternSignArticleView(sign: item)
+        }
+        .fullScreenCover(item: $selectedAnimal) { item in
+            ZodiacArticleView(guide: item, referenceYear: civil.year)
         }
     }
 }
