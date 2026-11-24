@@ -35,6 +35,11 @@ enum HeritageArtCatalog {
         guard let index = VietnameseLunarCalendar.chi.firstIndex(of: branch) else { return "" }
         return "TNVAnimal" + names[index]
     }
+
+    static var missingAssets: [String] {
+        let required = VietnameseLunarCalendar.chi.map { animal($0) } + WesternSign.allCases.map(\.asset)
+        return required.filter { UIImage(named: $0) == nil }
+    }
 }
 
 struct HeritageAnimalArtwork: View {
@@ -43,11 +48,7 @@ struct HeritageAnimalArtwork: View {
         if let image = UIImage(named: HeritageArtCatalog.animal(branch)) {
             Image(uiImage: image).resizable().scaledToFit()
         } else {
-            ZStack {
-                Circle().fill(HeritagePalette.red)
-                Circle().strokeBorder(HeritagePalette.gold, lineWidth: 2)
-                HeritageAnimalMark(branch: branch).padding(14)
-            }
+            MissingZodiacArtwork(name: HeritageArtCatalog.animal(branch))
         }
     }
 }
@@ -58,12 +59,21 @@ struct WesternArtwork: View {
         if let image = UIImage(named: sign.asset) {
             Image(uiImage: image).resizable().scaledToFit()
         } else {
-            ZStack {
-                Circle().fill(HeritagePalette.red)
-                Circle().strokeBorder(HeritagePalette.gold, lineWidth: 2)
-                Text(sign.symbol).font(.system(size: 42)).foregroundStyle(Color(hex: "#F3D68D"))
-            }
+            MissingZodiacArtwork(name: sign.asset)
         }
+    }
+}
+
+private struct MissingZodiacArtwork: View {
+    let name: String
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "photo.badge.exclamationmark").font(.title2)
+            Text("Thiếu ảnh").font(.caption.weight(.semibold))
+        }
+        .foregroundStyle(HeritagePalette.red)
+        .accessibilityLabel("Thiếu tài nguyên " + name)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -79,6 +89,12 @@ struct HeritageAstrologyView: View {
         ScrollView {
             VStack(spacing: 16) {
                 HeritageBanner(title: "Thiên mệnh", subtitle: "Can Chi · Con giáp · Hoàng đạo")
+                if !HeritageArtCatalog.missingAssets.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("Bản cài đặt thiếu ảnh", systemImage: "exclamationmark.triangle.fill").font(.headline)
+                        Text("Thiếu " + String(HeritageArtCatalog.missingAssets.count) + "/24 asset. Hãy cập nhật IPA mới; ứng dụng không dùng hình cũ để thay thế.").font(.caption)
+                    }.padding(12).frame(maxWidth: .infinity, alignment: .leading).heritageFrame()
+                }
                 DatePicker("Ngày sinh / ngày tra cứu", selection: $date, in: (SolarCivilDate(year: 1900, month: 1, day: 1).asDate()!)...(SolarCivilDate(year: 2100, month: 12, day: 31).asDate()!), displayedComponents: .date)
                     .environment(\.timeZone, VietnameseLunarCalendar.vietnamTimeZone)
                     .environment(\.locale, Locale(identifier: "vi_VN"))
@@ -127,6 +143,7 @@ struct HeritageAstrologyView: View {
                         }.buttonStyle(.plain)
                     }
                 }
+                Text("Bộ minh họa · 3.8").font(.caption2).foregroundStyle(HeritagePalette.soft)
                 Text("Cung Mặt Trời được ước tính bằng mốc ngày phổ biến. Ngày sát ranh giới cần giờ, nơi sinh và thiên văn chính xác. Tử vi, chiêm tinh là nội dung văn hóa, không có khả năng dự báo chắc chắn.").font(.caption).foregroundStyle(HeritagePalette.soft)
             }.padding(16)
         }
