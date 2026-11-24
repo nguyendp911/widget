@@ -93,10 +93,11 @@ struct ThienNienDetailSheet: View {
                 detail("Con giáp của năm", facts.yearAnimalName)
                 detail("Tuổi xung theo Địa Chi", facts.opposingAnimalName)
                 detail("Can Chi ngày", facts.canChiDay)
-                Text("Đây là thông tin con giáp và xung chi của ngày. Muốn lập lá số tử vi cá nhân cần thêm ngày, giờ và dữ liệu sinh; ứng dụng chưa cung cấp lá số đó.")
+                Text("Thông tin con giáp và xung chi theo ngày đang xem.")
                     .font(.system(size: 13))
                     .foregroundStyle(muted)
             }
+            HeritageBirthLookup()
         case .auspicious:
             group("SAO · TRỰC · HOÀNG ĐẠO") {
                 detail("Loại ngày", facts.dayKind)
@@ -284,5 +285,116 @@ struct ThienNienDetailSheet: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+}
+
+
+// Local cultural lookup; no prediction engine, network request or stored birth data.
+private struct HeritageBirthLookup: View {
+    @State private var birth = Date()
+    @State private var hour = 12
+    @State private var minute = 0
+    @State private var knowsTime = false
+    private var civil: SolarCivilDate? { SolarCivilDate(date: birth) }
+    private var facts: LunarAlmanacFacts? { civil.map { LunarAlmanacFacts($0) } }
+    private var range: ClosedRange<Date> {
+        (SolarCivilDate(year: 1900, month: 1, day: 1).asDate() ?? .distantPast)...Date()
+    }
+    private let branches = ["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"]
+    private let stems = ["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"]
+
+    private var hourCycle: String {
+        guard knowsTime, let stem = facts?.canChiDay.split(separator: " ").first,
+              let index = stems.firstIndex(of: String(stem)) else { return "Chưa nhập giờ sinh" }
+        let branch = ((hour + 1) / 2) % 12
+        return stems[(index % 5 * 2 + branch) % 10] + " " + branches[branch]
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HeritagePlaque(title: "TRA CỨU TUỔI & CAN CHI", jade: true)
+                .frame(height: 58)
+            Text("Thông tin văn hóa theo ngày sinh dương lịch")
+                .font(.subheadline).foregroundStyle(HeritagePalette.soft)
+            DatePicker("Ngày sinh", selection: $birth, in: range, displayedComponents: .date)
+                .environment(\.timeZone, VietnameseLunarCalendar.vietnamTimeZone)
+                .environment(\.locale, Locale(identifier: "vi_VN"))
+            Toggle("Biết giờ sinh", isOn: $knowsTime)
+            if knowsTime {
+                HStack {
+                    Picker("Giờ", selection: $hour) {
+                        ForEach(0..<24, id: \.self) { h in Text(String(format: "%02d giờ", h)).tag(h) }
+                    }
+                    Picker("Phút", selection: $minute) {
+                        ForEach(0..<60, id: \.self) { m in Text(String(format: "%02d phút", m)).tag(m) }
+                    }
+                }.pickerStyle(.menu)
+            }
+            if let civil, let facts,
+               let lunar = VietnameseLunarCalendar.solarToLunar(civil) {
+                HStack(spacing: 16) {
+                    HeritageZodiacSeal(branch: facts.yearAnimal)
+                        .frame(width: 98, height: 98)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(facts.canChiYear).font(.system(.title2, design: .serif).weight(.bold))
+                        Text("Tuổi " + facts.yearAnimalName).font(.subheadline.weight(.medium))
+                        Text("Âm lịch: " + lunar.label).font(.caption)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(12)
+                .foregroundStyle(HeritagePalette.ink)
+                .background(HeritagePalette.paper, in: RoundedRectangle(cornerRadius: 14))
+                result("Can Chi năm", facts.canChiYear)
+                result("Can Chi tháng", facts.canChiMonth)
+                result("Can Chi ngày", facts.canChiDay)
+                result("Can Chi giờ", hourCycle)
+                result("Tiết khí", facts.solarTerm)
+            }
+            Text("Giờ sinh hiểu theo múi giờ Việt Nam (UTC+7); giờ Tý từ 23h đến 1h, Can ngày tính theo ngày dân sự đã chọn. Đây là tra cứu lịch truyền thống, không phải lá số Tử Vi Đẩu Số hay dự báo vận mệnh.")
+                .font(.caption).foregroundStyle(HeritagePalette.soft)
+        }
+        .padding(15)
+        .heritageFrame()
+    }
+
+    private func result(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label).font(.subheadline).foregroundStyle(HeritagePalette.soft)
+            Spacer()
+            Text(value).font(.system(.subheadline, design: .serif).weight(.semibold))
+                .multilineTextAlignment(.trailing)
+                .foregroundStyle(HeritagePalette.ink)
+        }
+        .padding(.vertical, 3)
+    }
+}
+
+/// Resolution-independent bronze-drum inspired seal; text remains native and accessible.
+private struct HeritageZodiacSeal: View {
+    let branch: String
+    var body: some View {
+        ZStack {
+            Circle().fill(LinearGradient(colors: [Color(hex: "#76191C"), Color(hex: "#AE3430")], startPoint: .topLeading, endPoint: .bottomTrailing))
+            Circle().strokeBorder(Color(hex: "#DBB561"), lineWidth: 2)
+            Circle().strokeBorder(Color(hex: "#DBB561").opacity(0.8), lineWidth: 1).padding(6)
+            GeometryReader { g in
+                Path { p in
+                    let center = CGPoint(x: g.size.width / 2, y: g.size.height / 2)
+                    let radius = min(g.size.width, g.size.height) / 2
+                    for i in 0..<24 {
+                        let angle = Double(i) * .pi / 12
+                        let a = CGFloat(cos(angle))
+                        let b = CGFloat(sin(angle))
+                        p.move(to: CGPoint(x: center.x + a * radius * 0.72, y: center.y + b * radius * 0.72))
+                        p.addLine(to: CGPoint(x: center.x + a * radius * 0.82, y: center.y + b * radius * 0.82))
+                    }
+                }.stroke(Color(hex: "#DBB561"), lineWidth: 1.4)
+            }
+            VStack(spacing: 1) {
+                Text(branch).font(.system(size: 25, weight: .bold, design: .serif))
+                Text(LunarAlmanacFacts.animal(branch)).font(.system(size: 11, weight: .medium))
+            }.foregroundStyle(Color(hex: "#FFF1C9"))
+        }.accessibilityLabel("Tuổi " + LunarAlmanacFacts.animal(branch))
     }
 }
