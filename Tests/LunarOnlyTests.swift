@@ -14,6 +14,30 @@ final class LunarOnlyTests: XCTestCase {
         }
     }
 
+    func testZodiacKnowledgeCoverageAndCycle() {
+        XCTAssertEqual(AnimalGuide.all.map(\.branch), VietnameseLunarCalendar.chi)
+        XCTAssertEqual(WesternGuide.all.count, 12)
+        XCTAssertEqual(AnimalGuide.named("Mão")?.animal, "Mèo")
+        XCTAssertEqual(AnimalGuide.named("Tý")?.hour, "23:00 – 01:00")
+        XCTAssertEqual(AnimalGuide.named("Tý")?.harmony, "Sửu")
+        XCTAssertEqual(AnimalGuide.named("Mão")?.harmony, "Tuất")
+        XCTAssertEqual(AnimalGuide.named("Ngọ")?.opposing, "Tý")
+        XCTAssertEqual(AnimalGuide.named("Thân")?.trine, "Tý · Thìn · Thân")
+        XCTAssertEqual(NapAmGuide.lookup("Giáp Tý")?.name, "Hải Trung Kim")
+        XCTAssertEqual(NapAmGuide.lookup("Bính Ngọ")?.name, "Thiên Hà Thủy")
+        XCTAssertEqual(NapAmGuide.lookup("Quý Hợi")?.name, "Đại Hải Thủy")
+        XCTAssertNil(NapAmGuide.lookup("Giáp Sửu"))
+        for index in 0..<60 {
+            let cycle = VietnameseLunarCalendar.can[index%10] + " " + VietnameseLunarCalendar.chi[index%12]
+            XCTAssertNotNil(NapAmGuide.lookup(cycle))
+        }
+        for guide in AnimalGuide.all {
+            XCTAssertGreaterThan(guide.heritage.count, 100)
+            XCTAssertEqual(AnimalGuide.named(guide.harmony)?.harmony, guide.branch)
+            XCTAssertEqual(AnimalGuide.named(guide.opposing)?.opposing, guide.branch)
+        }
+    }
+
     func testWesternSignApproximateBoundaries() {
         XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 20)), .pisces)
         XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 21)), .aries)
