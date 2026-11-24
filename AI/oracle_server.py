@@ -7,6 +7,8 @@ import json
 import os
 import re
 import urllib.request
+import urllib.error
+import gemini_provider
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 TOPICS = {
@@ -59,7 +61,13 @@ def validate(p):
     hours = p["goodHours"]
     return isinstance(hours, list) and len(hours) <= 12 and all(isinstance(x,str) and x in BRANCHES for x in hours)
 
+def provider():
+    return os.environ.get("AI_PROVIDER", "gemini" if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") else "compatible").lower()
+
 def answer(p):
+    prompt = TOPICS[p["topic"]] + "\nDữ liệu lịch: " + json.dumps(p, ensure_ascii=False)
+    if provider() == "gemini":
+        return gemini_provider.generate(SYSTEM, prompt, os.environ.get("GEMINI_MODE", "balanced"))
     payload = {
         "model": os.environ["AI_MODEL"],
         "messages": [
@@ -75,7 +83,7 @@ def answer(p):
     result = result["choices"][0]["message"]["content"]
     if not isinstance(result,str) or not result.strip():
         raise ValueError("Empty model response")
-    return result[:12000]
+    return {"answer":result[:12000],"provider":"compatible","model":os.environ["AI_MODEL"]}
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
@@ -88,11 +96,32 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
+    def authorized(self):
+        expected = "Bearer " + os.environ["ORACLE_ACCESS_TOKEN"]
+        return hmac.compare_digest(self.headers.get("Authorization","").encode(), expected.encode())
+    def provider_error(self, exc):
+        code = getattr(exc, "code", None)
+        if code in (401,403):
+            return self.reply(502, {"error":"provider_auth"})
+        if code == 429:
+            return self.reply(429, {"error":"provider_quota"})
+        return self.reply(502, {"error":"provider_unavailable"})
+    def do_GET(self):
+        if self.path != "/oracle/models":
+            return self.reply(404, {"error":"not_found"})
+        if not self.authorized():
+            return self.reply(401, {"error":"unauthorized"})
+        try:
+            if provider() == "gemini":
+                return self.reply(200, gemini_provider.status())
+            model = os.environ["AI_MODEL"]
+            return self.reply(200, {"provider":"compatible","models":[{"id":model,"name":model}],"selected":model})
+        except Exception as exc:
+            return self.provider_error(exc)
     def do_POST(self):
         if self.path != "/oracle":
             return self.reply(404, {"error":"not_found"})
-        expected = "Bearer " + os.environ["ORACLE_ACCESS_TOKEN"]
-        if not hmac.compare_digest(self.headers.get("Authorization","").encode(), expected.encode()):
+        if not self.authorized():
             return self.reply(401, {"error":"unauthorized"})
         try:
             size = int(self.headers.get("Content-Length","0"))
@@ -104,16 +133,21 @@ class Handler(BaseHTTPRequestHandler):
         if not validate(p):
             return self.reply(400, {"error":"unsupported_topic_or_data"})
         try:
-            return self.reply(200, {"answer": answer(p)})
-        except Exception:
-            return self.reply(502, {"error":"provider_unavailable"})
+            return self.reply(200, answer(p))
+        except Exception as exc:
+            return self.provider_error(exc)
 
 if __name__ == "__main__":
-    for name in ("ORACLE_ACCESS_TOKEN","AI_PROVIDER_KEY","AI_MODEL","AI_CHAT_COMPLETIONS_URL"):
+    if provider() not in ("gemini","compatible"):
+        raise SystemExit("Unsupported AI_PROVIDER")
+    if provider() == "gemini" and not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        raise SystemExit("Missing GEMINI_API_KEY")
+    required = ("ORACLE_ACCESS_TOKEN",) if provider() == "gemini" else ("ORACLE_ACCESS_TOKEN","AI_PROVIDER_KEY","AI_MODEL","AI_CHAT_COMPLETIONS_URL")
+    for name in required:
         if not os.environ.get(name):
             raise SystemExit("Missing configuration: " + name)
     if len(os.environ["ORACLE_ACCESS_TOKEN"]) < 32:
         raise SystemExit("Use a random access token of at least 32 characters")
-    if not os.environ["AI_CHAT_COMPLETIONS_URL"].startswith("https://"):
+    if provider() == "compatible" and not os.environ["AI_CHAT_COMPLETIONS_URL"].startswith("https://"):
         raise SystemExit("Provider endpoint must use HTTPS")
     ThreadingHTTPServer(("127.0.0.1", int(os.environ.get("PORT","8080"))),Handler).serve_forever()
