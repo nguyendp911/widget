@@ -1,8 +1,19 @@
 import Foundation
 import XCTest
+import UIKit
 @testable import ViePNWidgetPlus
 
 final class LunarOnlyTests: XCTestCase {
+    func testAllZodiacAssetsAreBundled() {
+        for branch in VietnameseLunarCalendar.chi {
+            let name = HeritageArtCatalog.animal(branch)
+            XCTAssertNotNil(UIImage(named: name, in: Bundle.main, compatibleWith: nil), "Missing asset: " + name)
+        }
+        for sign in WesternSign.allCases {
+            XCTAssertNotNil(UIImage(named: sign.asset, in: Bundle.main, compatibleWith: nil), "Missing asset: " + sign.asset)
+        }
+    }
+
     func testWesternSignApproximateBoundaries() {
         XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 20)), .pisces)
         XCTAssertEqual(WesternSign.approximate(SolarCivilDate(year: 2026, month: 3, day: 21)), .aries)
