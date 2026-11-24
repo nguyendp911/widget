@@ -33,7 +33,7 @@ struct HeritageBanner: View {
             LinearGradient(colors: [Color(hex: "#FFF3D9").opacity(0.98), Color(hex: "#FFF3D9").opacity(0.85), .clear], startPoint: .leading, endPoint: .trailing)
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Image("TNVDrum").resizable().scaledToFit().frame(width: 53, height: 37)
+                    HeritageDrumMark(tint: HeritagePalette.gold).frame(width: 37, height: 37).accessibilityHidden(true)
                     Text(title).font(.system(size: 26, weight: .bold, design: .serif)).foregroundStyle(HeritagePalette.red).lineLimit(2).minimumScaleFactor(0.75)
                     Text(subtitle).font(.system(size: 12, weight: .medium)).foregroundStyle(HeritagePalette.ink)
                 }
@@ -55,7 +55,7 @@ struct HeritageDayHero: View {
         ZStack {
             LinearGradient(colors: [Color(hex: "#6F0C12"), Color(hex: "#B62123"), Color(hex: "#7E1114")], startPoint: .topLeading, endPoint: .bottomTrailing)
             if appearance.showOrnament {
-                Image("TNVDrum").resizable().scaledToFit().frame(width: 215).opacity(0.25)
+                HeritageDrumMark(tint: Color(hex: "#EAC67A")).frame(width: 215, height: 215).opacity(0.22).accessibilityHidden(true)
                 VStack {
                     HStack {
                         Image("TNVBlossom").resizable().scaledToFit().frame(width: 100)
@@ -132,5 +132,48 @@ struct HeritagePlaque: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+    }
+}
+
+
+/// Native scalable ornament inspired by concentric Đông Sơn bronze-drum
+/// geometry. It is drawn at the device's resolution, never upscaled as a bitmap.
+struct HeritageDrumMark: View {
+    var tint: Color = HeritagePalette.gold
+    var body: some View {
+        GeometryReader { proxy in
+            let size = min(proxy.size.width, proxy.size.height)
+            ZStack {
+                Circle().strokeBorder(tint, lineWidth: max(0.7, size * 0.012))
+                ForEach([0.90, 0.76, 0.66, 0.48], id: \.self) { scale in
+                    Circle().strokeBorder(tint, lineWidth: max(0.55, size * 0.006))
+                        .frame(width: size * scale, height: size * scale)
+                }
+                Path { path in
+                    let center = CGPoint(x: size / 2, y: size / 2)
+                    for i in 0..<24 {
+                        let a = Double(i) * .pi / 12
+                        let b = a + .pi / 24
+                        func point(_ angle: Double, _ radius: CGFloat) -> CGPoint {
+                            CGPoint(x: center.x + CGFloat(cos(angle)) * radius * size,
+                                    y: center.y + CGFloat(sin(angle)) * radius * size)
+                        }
+                        path.move(to: point(a, 0.385))
+                        path.addLine(to: point(b, 0.445))
+                        path.addLine(to: point(a + .pi / 12, 0.385))
+                    }
+                    for i in 0..<24 {
+                        let angle = Double(i) * .pi / 12 - .pi / 2
+                        let radius: CGFloat = i.isMultiple(of: 2) ? 0.225 : 0.082
+                        let point = CGPoint(x: center.x + CGFloat(cos(angle)) * radius * size,
+                                            y: center.y + CGFloat(sin(angle)) * radius * size)
+                        if i == 0 { path.move(to: point) } else { path.addLine(to: point) }
+                    }
+                    path.closeSubpath()
+                }.stroke(tint, style: StrokeStyle(lineWidth: max(0.55, size * 0.008), lineJoin: .round))
+            }
+            .frame(width: size, height: size)
+            .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+        }
     }
 }
