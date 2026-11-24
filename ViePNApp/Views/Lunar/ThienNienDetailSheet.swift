@@ -98,6 +98,18 @@ struct ThienNienDetailSheet: View {
                     .foregroundStyle(muted)
             }
             HeritageBirthLookup()
+            group("MƯỜI HAI CON GIÁP VIỆT") {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
+                    ForEach(VietnameseLunarCalendar.chi, id: \.self) { branch in
+                        VStack(spacing: 4) {
+                            HeritageZodiacSeal(branch: branch)
+                                .frame(width: 72, height: 72)
+                            Text(LunarAlmanacFacts.animal(branch))
+                                .font(.caption.weight(.medium))
+                        }.frame(maxWidth: .infinity)
+                    }
+                }
+            }
         case .auspicious:
             group("SAO · TRỰC · HOÀNG ĐẠO") {
                 detail("Loại ngày", facts.dayKind)
@@ -391,9 +403,10 @@ private struct HeritageZodiacSeal: View {
                     }
                 }.stroke(Color(hex: "#DBB561"), lineWidth: 1.4)
             }
-            VStack(spacing: 1) {
-                Text(branch).font(.system(size: 25, weight: .bold, design: .serif))
-                Text(LunarAlmanacFacts.animal(branch)).font(.system(size: 11, weight: .medium))
+            VStack(spacing: 2) {
+                HeritageAnimalMark(branch: branch)
+                    .frame(width: 42, height: 42)
+                Text(branch).font(.system(size: 12, weight: .semibold, design: .serif))
             }.foregroundStyle(Color(hex: "#FFF1C9"))
         }.accessibilityLabel("Tuổi " + LunarAlmanacFacts.animal(branch))
     }
