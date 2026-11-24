@@ -67,27 +67,8 @@ private struct WesternArtwork: View {
     }
 }
 
-enum HeritageOracleTopic: String, CaseIterable, Identifiable {
-    case canChi, lunar, zodiac, western, elements, hours, terms, memorial, tuVi
-    var id: String { rawValue }
-    var title: String {
-        switch self {
-        case .canChi: return "Thiên Can · Địa Chi"
-        case .lunar: return "Âm dương lịch"
-        case .zodiac: return "12 con giáp"
-        case .western: return "12 cung hoàng đạo"
-        case .elements: return "Ngũ hành · Nạp âm"
-        case .hours: return "Giờ hoàng đạo"
-        case .terms: return "24 tiết khí"
-        case .memorial: return "Ngày giỗ · Phong tục"
-        case .tuVi: return "Tử Vi Đẩu Số"
-        }
-    }
-}
-
 struct HeritageAstrologyView: View {
     @State private var date = Date()
-    @State private var showOracle = false
     @State private var selectedSign: WesternSign?
     private var civil: SolarCivilDate { SolarCivilDate(date: date) ?? SolarCivilDate(year: 2026, month: 11, day: 24) }
     private var facts: LunarAlmanacFacts { LunarAlmanacFacts(civil) }
@@ -113,9 +94,6 @@ struct HeritageAstrologyView: View {
                         Text(sign.element).font(.caption)
                     }.frame(maxWidth: .infinity).padding(12).heritageFrame()
                 }
-                Button { showOracle = true } label: {
-                    HeritagePlaque(title: "Hỏi Thiên Niên AI", jade: true)
-                }.buttonStyle(.plain)
                 HeritagePlaque(title: "Mười hai con giáp Việt")
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 10) {
                     ForEach(VietnameseLunarCalendar.chi, id: \.self) { branch in
@@ -143,150 +121,21 @@ struct HeritageAstrologyView: View {
         .foregroundStyle(HeritagePalette.ink)
         .navigationTitle("Thiên mệnh")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showOracle) { HeritageOracleView(civil: civil) }
-        .sheet(item: $selectedSign) { item in
-            VStack(spacing: 15) {
-                WesternArtwork(sign: item).frame(height: 180)
-                Text(item.symbol + " " + item.name).font(.system(.title, design: .serif).bold())
-                Text(item.period)
-                Text("Nguyên tố truyền thống: " + item.element)
-                Text("Mốc ngày chỉ mang tính ước tính.").font(.caption)
-            }.padding(24).presentationDetents([.medium,.large]).presentationDragIndicator(.visible)
-        }
-    }
-}
-
-private struct OracleRequest: Encodable {
-    let topic: String
-    let date: String
-    let lunar: String
-    let dayCanChi: String
-    let monthCanChi: String
-    let yearCanChi: String
-    let term: String
-    let goodHours: [String]
-    let western: String
-}
-private struct OracleResponse: Decodable {
-    let answer: String
-    let provider: String?
-    let model: String?
-}
-private struct OracleModelStatus: Decodable {
-    struct Model: Decodable, Identifiable { let id: String; let name: String }
-    let provider: String
-    let models: [Model]
-    let selected: String?
-}
-
-struct HeritageOracleView: View {
-    let civil: SolarCivilDate
-    @Environment(\.dismiss) private var dismiss
-    @AppStorage("tnv.oracle.endpoint") private var endpoint = ""
-    @State private var accessToken = ""
-    @State private var topic = HeritageOracleTopic.canChi
-    @State private var answer = ""
-    @State private var busy = false
-    @State private var allowShare = false
-    @State private var status: OracleModelStatus?
-    @State private var statusMessage = ""
-    @State private var actualModel = ""
-    @State private var checking = false
-    private var facts: LunarAlmanacFacts { LunarAlmanacFacts(civil) }
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    HeritageBanner(title: "Thiên Niên AI", subtitle: "Trợ lý chuyên tri thức lịch Việt")
-                    Text("Ngày tra cứu: " + civil.label).font(.headline)
-                    Picker("Chủ đề", selection: $topic) {
-                        ForEach(HeritageOracleTopic.allCases) { item in Text(item.title).tag(item) }
-                    }.pickerStyle(.menu)
-                    Text("Chỉ hỗ trợ các chủ đề được liệt kê, không có ô nhập lệnh tự do.").font(.caption)
-                    DisclosureGroup("Kết nối máy chủ AI") {
-                        TextField("https://máy-chủ.example/oracle", text: $endpoint)
-                            .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL).textFieldStyle(.roundedBorder)
-                        SecureField("Mã truy cập máy chủ", text: $accessToken).textFieldStyle(.roundedBorder)
-                        Text("Mã truy cập chỉ lưu trong phiên này. Khóa Gemini đặt trên máy chủ.").font(.caption)
-                        Button {
-                            Task { await checkModels() }
-                        } label: {
-                            if checking { ProgressView() }
-                            else { Label("Kiểm tra & tự nhận diện model", systemImage: "arrow.triangle.2.circlepath") }
-                        }.disabled(checking || busy || endpoint.isEmpty || accessToken.isEmpty)
-                        if !statusMessage.isEmpty { Text(statusMessage).font(.caption).foregroundStyle(HeritagePalette.soft) }
-                        if let status {
-                            Text(status.provider == "gemini" ? "Google Gemini · Tự động" : "AI tương thích").font(.headline)
-                            Text("Ưu tiên: " + (status.selected ?? "Chưa có model")).font(.caption)
-                            DisclosureGroup("Model khả dụng (" + String(status.models.count) + ")") {
-                                ForEach(status.models) { model in
-                                    Text(model.id).font(.caption).textSelection(.enabled)
-                                }
-                            }
-                        }
-                    }
-                    Toggle("Đồng ý gửi ngày tra cứu và dữ liệu lịch đã tính đến máy chủ", isOn: $allowShare)
-                        .font(.subheadline)
-                    Button {
-                        Task { await ask() }
-                    } label: {
-                        if busy { ProgressView().frame(maxWidth: .infinity) }
-                        else { Label("Tra cứu cùng AI", systemImage: "sparkles").frame(maxWidth: .infinity) }
-                    }.buttonStyle(.borderedProminent).disabled(busy || checking || !allowShare || endpoint.isEmpty || accessToken.isEmpty)
-                    if !actualModel.isEmpty {
-                        Label("Model trả lời: " + actualModel, systemImage: "cpu").font(.caption).foregroundStyle(HeritagePalette.soft)
-                    }
-                    if !answer.isEmpty { Text(answer).textSelection(.enabled).padding(14).frame(maxWidth: .infinity, alignment: .leading).heritageFrame() }
-                    Text("AI có thể sai. Không dùng tử vi thay cho tư vấn y tế, pháp lý, tài chính hoặc quyết định quan trọng.").font(.caption).foregroundStyle(HeritagePalette.soft)
-                }.padding(16)
-            }.background(HeritagePalette.paper.ignoresSafeArea())
-            .navigationTitle("Thiên Niên AI").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Đóng") { dismiss() } } }
-        }.presentationDragIndicator(.visible)
-    }
-    private var serverURL: URL? {
-        guard let url = URL(string: endpoint.trimmingCharacters(in: .whitespacesAndNewlines)),
-              url.scheme?.lowercased() == "https", url.host != nil, url.user == nil, url.password == nil,
-              url.query == nil, url.fragment == nil, url.lastPathComponent == "oracle" else { return nil }
-        return url
-    }
-    @MainActor private func checkModels() async {
-        guard let url = serverURL else { statusMessage = "Nhập URL HTTPS kết thúc bằng /oracle."; return }
-        checking = true; status = nil; statusMessage = ""; defer { checking = false }
-        do {
-            var req = URLRequest(url: url.appendingPathComponent("models"), timeoutInterval: 70)
-            req.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-            let (data, response) = try await URLSession.shared.data(for: req)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count < 200_000 else {
-                statusMessage = "Không đọc được danh sách model. Kiểm tra máy chủ, khóa Gemini hoặc hạn mức."; return
+        .fullScreenCover(item: $selectedSign) { item in
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 18) {
+                        WesternArtwork(sign: item).frame(maxWidth: 280).frame(height: 260)
+                        Text(item.symbol + " " + item.name).font(.system(.title, design: .serif).bold())
+                        Text(item.period)
+                        Text("Nguyên tố truyền thống: " + item.element)
+                        Text("Mốc ngày chỉ mang tính ước tính.").font(.caption)
+                    }.padding(24).frame(maxWidth: .infinity)
+                }
+                .background(HeritagePalette.paper.ignoresSafeArea())
+                .navigationTitle(item.name).navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Đóng") { selectedSign = nil } } }
             }
-            status = try JSONDecoder().decode(OracleModelStatus.self, from: data)
-            statusMessage = "Đã nhận danh sách model từ máy chủ."
-        } catch { statusMessage = "Không kết nối được máy chủ." }
-    }
-    @MainActor private func ask() async {
-        guard allowShare, let url = serverURL else {
-            answer = "Cần địa chỉ HTTPS hợp lệ."; return
         }
-        busy = true; answer = ""; actualModel = ""; defer { busy = false }
-        do {
-            var request = URLRequest(url: url, timeoutInterval: 100)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-            let payload = OracleRequest(topic: topic.rawValue, date: civil.label,
-                lunar: VietnameseLunarCalendar.solarToLunar(civil)?.label ?? "—", dayCanChi: facts.canChiDay,
-                monthCanChi: facts.canChiMonth, yearCanChi: facts.canChiYear, term: facts.solarTerm,
-                goodHours: facts.goodHours, western: WesternSign.approximate(civil).rawValue)
-            request.httpBody = try JSONEncoder().encode(payload)
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count < 200_000 else {
-                let code = (response as? HTTPURLResponse)?.statusCode
-                answer = code == 429 ? "Gemini đã chạm hạn mức. Thử lại sau hoặc kiểm tra quota." : code == 401 ? "Mã truy cập máy chủ không hợp lệ." : "Máy chủ AI chưa sẵn sàng. Kiểm tra cấu hình Gemini."; return
-            }
-            let result = try JSONDecoder().decode(OracleResponse.self, from: data)
-            answer = result.answer
-            actualModel = result.model ?? ""
-        } catch { answer = "Không kết nối được máy chủ AI. Kiểm tra cấu hình và mạng." }
     }
 }
