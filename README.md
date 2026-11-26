@@ -1,7 +1,5 @@
 # ViePN Lịch Việt
 
-Repository đã được dọn sạch mã nguồn dự án Thiên Niên Việt cũ. Mã nguồn ViePN Lịch Việt mới chưa được tải lên.
+Đang nhập mã nguồn dự án mới. Bộ Asset Catalog V5 chưa được truyền lên, chưa phải bản build hoàn chỉnh.
 
-Bundle ID cần giữ: `com.viepn.widgetplus`.
-
-Bản sao lưu: `backup/thien-nien-viet-before-lich-viet`.
+Bundle ID: `com.viepn.widgetplus`.
