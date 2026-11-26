@@ -1,0 +1,28 @@
+{
+  "colors": {
+    "primary": "#B71C1C",
+    "accent": "#F4B400",
+    "warmBackground": "#FFF8E1",
+    "background": "#F5F5F5",
+    "text": "#333333",
+    "success": "#2E7D32",
+    "utility": "#1976D2"
+  },
+  "typography": {
+    "ui": "SF Pro (system)",
+    "display": "Lora (optional, not bundled)"
+  },
+  "cornerRadius": {
+    "card": 16,
+    "button": 14,
+    "iconTile": 14
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32
+  ]
+}
